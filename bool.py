@@ -168,6 +168,11 @@ class OrClause(Expression):
         neg = ["~" + name for name in self.negated_names]
         return "|".join(pos + neg)
 
+    def AND_VAR(self, other):
+        if other.name in self.names:
+            return other
+        assert False
+
     def OR_VAR(self, other):
         if other.name in self.names:
             return self

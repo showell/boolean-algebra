@@ -80,3 +80,7 @@ def negated_or_clauses():
     assert_str((z | x) | ~x, "T")
     assert_str((~z | x) | (y | ~z), "x|y|~z")
     assert_str((x | z) | (x | ~z), "T")
+
+def or_clauses_and_var():
+    assert_str(x & (x | y), "x") 
+    assert_str((x | y) & x, "x") 
