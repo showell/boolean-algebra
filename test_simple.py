@@ -28,6 +28,21 @@ def double_negation():
 
 
 @run_test
+def associativity():
+    assert_str(x & (y & z), "x&y&z")
+    assert_str(x | (y | z), "x|y|z")
+
+
+@run_test
+def commutativity():
+    assert_str(y & x, "x&y")
+    assert_str(x & y, "x&y")
+
+    assert_str(y | x, "x|y")
+    assert_str(x | y, "x|y")
+
+
+@run_test
 def identity():
     assert_str(x & T, "x")
     assert_str(x | F, "x")
@@ -43,6 +58,12 @@ def annihilator():
 def idemptotence():
     assert_str(x & x, "x")
     assert_str(x | x, "x")
+
+
+@run_test
+def absorption():
+    assert_str(x & (x | y), "x")
+    assert_str(x | (x & y), "x")
 
 
 @run_test
@@ -84,7 +105,6 @@ def negated_or_clauses():
 
 @run_test
 def or_clauses_and_var():
-    assert_str(x & (x | y), "x")
     assert_str((x | y) & x, "x")
     assert_str(x & (~x | y), "y")
     assert_str((~x | y) & x, "y")

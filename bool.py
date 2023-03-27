@@ -180,6 +180,21 @@ class AndClause(Clause):
     def __str__(self):
         return "&".join(self.stringified_vars())
 
+    def OR_SIGNED_VAR(self, other):
+        found = False
+        signed_vars = []
+        for sv in self.signed_vars:
+            if sv.name == other.name:
+                if sv.sign == other.sign:
+                    return other
+                else:
+                    found = True
+            else:
+                signed_vars.append(sv)
+        if found:
+            return AndClause(signed_vars)
+        assert False
+
     def AND_SIGNED_VAR(self, other):
         return self.AND_AND_CLAUSE(AndClause([other]))
 
