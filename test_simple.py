@@ -88,3 +88,15 @@ def or_clauses_and_var():
     assert_str((x | y) & x, "x")
     assert_str(x & (~x | y), "y")
     assert_str((~x | y) & x, "y")
+
+
+@run_test
+def simple_and_clauses():
+    assert_str(x & y, "x&y")
+    assert_str(x & y & z, "x&y&z")
+    assert_str(z & x & y, "x&y&z")
+    assert_str((z & x) & y, "x&y&z")
+    assert_str((z & x) & (y & w), "w&x&y&z")
+    assert_str((z & x) & (y & ~w), "~w&x&y&z")
+    assert_str((z & x) & (y & ~w) & T, "~w&x&y&z")
+    assert_str((z & x) & (y & ~w) & F, "F")

@@ -24,6 +24,9 @@ class Expression:
         if type(other) == OrClause:
             return self.AND_OR_CLAUSE(other).simplify()
 
+        if type(other) == AndClause:
+            return self.AND_AND_CLAUSE(other).simplify()
+
         assert False
 
     def OR(self, other):
@@ -38,6 +41,9 @@ class Expression:
 
         if type(other) == OrClause:
             return self.OR_OR_CLAUSE(other).simplify()
+
+        if type(other) == AndClause:
+            return self.OR_AND_CLAUSE(other).simplify()
 
         assert False
 
@@ -87,7 +93,7 @@ class SignedVar(Expression):
     def AND_SIGNED_VAR(self, other):
         if other.name == self.name:
             return self if self.sign == other.sign else FALSE
-        assert False
+        return AndClause([self, other])
 
     def OR_SIGNED_VAR(self, other):
         if other.name == self.name:
@@ -99,6 +105,12 @@ class SignedVar(Expression):
 
     def AND_OR_CLAUSE(self, other):
         return other.AND_SIGNED_VAR(self)
+
+    def AND_AND_CLAUSE(self, other):
+        return other.AND_SIGNED_VAR(self)
+
+    def OR_AND_CLAUSE(self, other):
+        return other.OR_SIGNED_VAR(self)
 
     def NOT(self):
         return SignedVar(self.name, not self.sign)
@@ -162,6 +174,26 @@ class OrClause(Clause):
     def make(names, negated_names):
         signed_vars = Clause.make_signed_vars(names, negated_names)
         return OrClause(signed_vars)
+
+
+class AndClause(Clause):
+    def __str__(self):
+        return "&".join(self.stringified_vars())
+
+    def AND_SIGNED_VAR(self, other):
+        return self.AND_AND_CLAUSE(AndClause([other]))
+
+    def AND_AND_CLAUSE(self, other):
+        names = self.names | other.names
+        negated_names = self.negated_names | other.negated_names
+        if names & negated_names:
+            return FALSE
+        return AndClause.make(names, negated_names)
+
+    @staticmethod
+    def make(names, negated_names):
+        signed_vars = Clause.make_signed_vars(names, negated_names)
+        return AndClause(signed_vars)
 
 
 TRUE = TrueVal()
