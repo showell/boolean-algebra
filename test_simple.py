@@ -3,6 +3,8 @@ from lib.test_helpers import run_test, assert_str
 
 T = TRUE
 F = FALSE
+
+w = SYMBOL("w")
 x = SYMBOL("x")
 y = SYMBOL("y")
 z = SYMBOL("z")
@@ -56,3 +58,25 @@ def complementation():
 def simple_or_clauses():
     assert_str(x | y, "x|y")
     assert_str(z | y | x, "x|y|z")
+
+
+@run_test
+def negated_or_clauses():
+    assert_str(x | ~y, "x|~y")
+    assert_str(~y | x, "x|~y")
+
+    assert_str(z | x | ~y, "x|z|~y")
+    assert_str(z | ~y | x, "x|z|~y")
+
+    assert_str(z | x | ~y | w, "w|x|z|~y")
+    assert_str(z | x | ~y | ~w, "x|z|~w|~y")
+
+    assert_str(z | x | ~y | w | z, "w|x|z|~y")
+    assert_str(z | x | ~y | ~w | z, "x|z|~w|~y")
+
+    assert_str((z | x) | (~y | w | z), "w|x|z|~y")
+    assert_str((z | x) | (~y | ~w | z), "x|z|~w|~y")
+
+    assert_str((z | x) | ~x, "T")
+    assert_str((~z | x) | (y | ~z), "x|y|~z")
+    assert_str((x | z) | (x | ~z), "T")

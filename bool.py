@@ -113,8 +113,10 @@ class Var(Expression):
         return FALSE
 
     def OR_NEGATED_VAR(self, other):
-        assert other.name == self.name
-        return TRUE
+        if other.name == self.name:
+            return TRUE
+        else:
+            return OrClause([self.name], [other.name])
 
     def OR_OR_CLAUSE(self, other):
         return other.OR_VAR(self)
@@ -135,16 +137,22 @@ class NegatedVar(Expression):
         return FALSE
 
     def OR_VAR(self, other):
-        assert other.name == self.name
-        return TRUE
+        if other.name == self.name:
+            return TRUE
+        else:
+            return OrClause([other.name], [self.name])
 
     def AND_NEGATED_VAR(self, other):
         assert other.name == self.name
         return self
 
     def OR_NEGATED_VAR(self, other):
-        assert other.name == self.name
-        return self
+        if other.name == self.name:
+            return self
+        return OrClause([], [self.name, other.name])
+
+    def OR_OR_CLAUSE(self, other):
+        return other.OR_NEGATED_VAR(self)
 
     def NOT(self):
         return Var(self.name)
@@ -153,15 +161,33 @@ class NegatedVar(Expression):
 class OrClause(Expression):
     def __init__(self, names, negated_names):
         self.names = sorted(names)
-        assert not negated_names
+        self.negated_names = sorted(negated_names)
 
     def __str__(self):
-        return "|".join(self.names)
+        pos = self.names
+        neg = ["~" + name for name in self.negated_names]
+        return "|".join(pos + neg)
 
     def OR_VAR(self, other):
         if other.name in self.names:
             return self
-        return OrClause(self.names + [other.name], [])
+        if other.name in self.negated_names:
+            return TRUE
+        return OrClause(self.names + [other.name], self.negated_names)
+
+    def OR_NEGATED_VAR(self, other):
+        if other.name in self.names:
+            return TRUE
+        if other.name in self.negated_names:
+            return self
+        return OrClause(self.names, self.negated_names + [other.name])
+
+    def OR_OR_CLAUSE(self, other):
+        names = set(self.names) | set(other.names)
+        negated_names = set(self.negated_names) | set(other.negated_names)
+        if names & negated_names:
+            return TRUE
+        return OrClause(names, negated_names)
 
 
 TRUE = TrueVal()
