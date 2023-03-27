@@ -8,6 +8,9 @@ class Expression:
     def __invert__(self):
         return self.NOT()
 
+    def simplify(self):
+        return self
+
     def AND(self, other):
         if type(other) == TrueVal:
             return self
@@ -16,10 +19,10 @@ class Expression:
             return FALSE
 
         if type(other) == Var:
-            return self.AND_VAR(other)
+            return self.AND_VAR(other).simplify()
 
         if type(other) == NegatedVar:
-            return self.AND_NEGATED_VAR(other)
+            return self.AND_NEGATED_VAR(other).simplify()
 
         assert False
 
@@ -31,10 +34,10 @@ class Expression:
             return self
 
         if type(other) == Var:
-            return self.OR_VAR(other)
+            return self.OR_VAR(other).simplify()
 
         if type(other) == NegatedVar:
-            return self.OR_NEGATED_VAR(other)
+            return self.OR_NEGATED_VAR(other).simplify()
 
         assert False
 
