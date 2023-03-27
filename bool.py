@@ -84,27 +84,27 @@ class SignedVar(Expression):
     def __str__(self):
         return self.name if self.sign else "~" + self.name
 
+    def AND(self, other):
+        if type(other) == SignedVar:
+            return self.AND_SIGNED_VAR(other)
+        else:
+            return other.AND(self)
+
     def AND_SIGNED_VAR(self, other):
         if other.name == self.name:
             return self if self.sign == other.sign else FALSE
         return AndClause([self, other])
 
+    def OR(self, other):
+        if type(other) == SignedVar:
+            return self.OR_SIGNED_VAR(other)
+        else:
+            return other.OR(self)
+
     def OR_SIGNED_VAR(self, other):
         if other.name == self.name:
             return self if self.sign == other.sign else TRUE
         return OrClause([self, other])
-
-    def OR_OR_CLAUSE(self, other):
-        return other.OR_SIGNED_VAR(self)
-
-    def AND_OR_CLAUSE(self, other):
-        return other.AND_SIGNED_VAR(self)
-
-    def AND_AND_CLAUSE(self, other):
-        return other.AND_SIGNED_VAR(self)
-
-    def OR_AND_CLAUSE(self, other):
-        return other.OR_SIGNED_VAR(self)
 
     def NOT(self):
         return SignedVar(self.name, not self.sign)
