@@ -75,6 +75,7 @@ class FalseVal(Expression):
     def NOT(self):
         return TRUE
 
+
 class SignedVar(Expression):
     def __init__(self, name, sign):
         self.name = name
@@ -87,7 +88,7 @@ class SignedVar(Expression):
         if other.name == self.name:
             return self if self.sign == other.sign else FALSE
         assert False
- 
+
     def OR_SIGNED_VAR(self, other):
         if other.name == self.name:
             return self if self.sign == other.sign else TRUE
@@ -101,7 +102,7 @@ class SignedVar(Expression):
 
     def NOT(self):
         return SignedVar(self.name, not self.sign)
-        
+
 
 class OrClause(Expression):
     def __init__(self, signed_vars):
@@ -137,39 +138,14 @@ class OrClause(Expression):
 
     @staticmethod
     def make(names, negated_names):
-        signed_vars = [SignedVar(name, True) for name in names] + [SignedVar(name, False) for name in negated_names]
+        signed_vars = [SignedVar(name, True) for name in names] + [
+            SignedVar(name, False) for name in negated_names
+        ]
         return OrClause(signed_vars)
-        
 
 
 TRUE = TrueVal()
 FALSE = FalseVal()
-
-
-def _AND2(a, b):
-    return a.AND(b)
-
-
-def _OR2(a, b):
-    return a.OR(b)
-
-
-def NOT(a):
-    return a.NOT()
-
-
-def AND(*lst):
-    assert len(lst) >= 1
-    if len(lst) == 1:
-        return lst[0]
-    return _AND2(lst[0], AND(*lst[1:]))
-
-
-def OR(*lst):
-    assert len(lst) >= 1
-    if len(lst) == 1:
-        return lst[0]
-    return _OR2(lst[0], OR(*lst[1:]))
 
 
 def SYMBOL(name):
