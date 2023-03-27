@@ -101,13 +101,16 @@ class OrClause(Expression):
                 assert self_name == other_name
                 if self_name == other_name:
                     if self_sign != other_sign:
-                        return FALSE
+                        continue
                     if self_sign:
                         names.add(self_name)
                     else:
                         negated_names.add(self_name)
 
-        return OrClause(names, negated_names)
+        if names or negated_names:
+            return OrClause(names, negated_names)
+
+        return FALSE
 
     def NOT(self):
         if len(self.names) == 1 and len(self.negated_names) == 0:
