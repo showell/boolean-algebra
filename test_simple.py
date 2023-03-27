@@ -86,3 +86,5 @@ def negated_or_clauses():
 def or_clauses_and_var():
     assert_str(x & (x | y), "x")
     assert_str((x | y) & x, "x")
+    assert_str(x & (~x | y), "y")
+    assert_str((~x | y) & x, "y")
