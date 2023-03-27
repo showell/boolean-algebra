@@ -40,6 +40,12 @@ def OrClause_AND_SignedVar(clause, signed_var):
                 break
     assert False
 
+def OrClause_OR_SignedVar(clause, signed_var):
+    return OrClause_OR_OrClause(clause, OrClause([signed_var]))
+
+def AndClause_AND_SignedVar(clause, signed_var):
+    return AndClause_AND_AndClause(clause, AndClause([signed_var]))
+
 class Expression:
     def __and__(self, other):
         return self.AND(other)
@@ -183,7 +189,7 @@ class OrClause(Clause):
         return OrClause_AND_SignedVar(self, other)
 
     def OR_SIGNED_VAR(self, other):
-        return self.OR_OR_CLAUSE(OrClause([other]))
+        return OrClause_OR_SignedVar(self, other)
 
     def OR_OR_CLAUSE(self, other):
         return OrClause_OR_OrClause(self, other)
@@ -204,7 +210,7 @@ class AndClause(Clause):
         return AndClause_OR_SignedVar(self, other)
 
     def AND_SIGNED_VAR(self, other):
-        return self.AND_AND_CLAUSE(AndClause([other]))
+        return AndClause_AND_SignedVar(self, other)
 
     def AND_AND_CLAUSE(self, other):
         return AndClause_AND_AndClause(self, other)
