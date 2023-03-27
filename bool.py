@@ -116,6 +116,15 @@ class OrClause(Expression):
         signed_vars = sorted(list(self.signed_vars), key=lambda sv: sv.name)
         return "|".join(str(sv) for sv in signed_vars)
 
+    def AND_SIGNED_VAR(self, other):
+        for sv in self.signed_vars:
+            if sv.name == other.name:
+                if sv.sign == other.sign:
+                    return other
+                else:
+                    assert False
+        assert False
+
     def OR_SIGNED_VAR(self, other):
         return self.OR_OR_CLAUSE(OrClause([other]))
 
