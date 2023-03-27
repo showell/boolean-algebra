@@ -1,3 +1,45 @@
+def SignedVar_AND_SignedVar(x, y):
+    if x.name == y.name:
+        return x if x.sign == y.sign else FALSE
+    return AndClause([x, y])
+
+def SignedVar_OR_SignedVar(x, y):
+    if x.name == y.name:
+        return x if x.sign == y.sign else TRUE
+    return OrClause([x, y])
+
+def AndClause_AND_AndClause(x, y):
+    names = x.names | y.names
+    negated_names = x.negated_names | y.negated_names
+    if names & negated_names:
+        return FALSE
+    return AndClause.make(names, negated_names)
+
+def OrClause_OR_OrClause(x, y):
+    names = x.names | y.names
+    negated_names = x.negated_names | y.negated_names
+    if names & negated_names:
+        return TRUE
+    return OrClause.make(names, negated_names)
+
+def AndClause_OR_SignedVar(clause, signed_var):
+    for sv in clause.signed_vars:
+        if sv.name == signed_var.name:
+            if sv.sign == signed_var.sign:
+                return signed_var
+            else:
+                break
+    assert False
+
+def OrClause_AND_SignedVar(clause, signed_var):
+    for sv in clause.signed_vars:
+        if sv.name == signed_var.name:
+            if sv.sign == signed_var.sign:
+                return signed_var
+            else:
+                break
+    assert False
+
 class Expression:
     def __and__(self, other):
         return self.AND(other)
@@ -91,9 +133,7 @@ class SignedVar(Expression):
             return other.AND(self)
 
     def AND_SIGNED_VAR(self, other):
-        if other.name == self.name:
-            return self if self.sign == other.sign else FALSE
-        return AndClause([self, other])
+        return SignedVar_AND_SignedVar(self, other)
 
     def OR(self, other):
         if type(other) == SignedVar:
@@ -102,9 +142,7 @@ class SignedVar(Expression):
             return other.OR(self)
 
     def OR_SIGNED_VAR(self, other):
-        if other.name == self.name:
-            return self if self.sign == other.sign else TRUE
-        return OrClause([self, other])
+        return SignedVar_OR_SignedVar(self, other)
 
     def NOT(self):
         return SignedVar(self.name, not self.sign)
@@ -130,9 +168,6 @@ class Clause(Expression):
             return self.signed_vars[0]
         return self
 
-    def NOT(self):
-        return AndClause.make(self.negated_names, self.names)
-
     @staticmethod
     def make_signed_vars(names, negated_names):
         return [SignedVar(name, True) for name in names] + [
@@ -145,52 +180,34 @@ class OrClause(Clause):
         return "|".join(self.stringified_vars())
 
     def AND_SIGNED_VAR(self, other):
-        for sv in self.signed_vars:
-            if sv.name == other.name:
-                if sv.sign == other.sign:
-                    return other
-                else:
-                    break
-        assert False
+        return OrClause_AND_SignedVar(self, other)
 
     def OR_SIGNED_VAR(self, other):
         return self.OR_OR_CLAUSE(OrClause([other]))
 
     def OR_OR_CLAUSE(self, other):
-        names = self.names | other.names
-        negated_names = self.negated_names | other.negated_names
-        if names & negated_names:
-            return TRUE
-        return OrClause.make(names, negated_names)
+        return OrClause_OR_OrClause(self, other)
+
+    def NOT(self):
+        return AndClause.make(self.negated_names, self.names)
 
     @staticmethod
     def make(names, negated_names):
         signed_vars = Clause.make_signed_vars(names, negated_names)
         return OrClause(signed_vars)
 
-
 class AndClause(Clause):
     def __str__(self):
         return "&".join(self.stringified_vars())
 
     def OR_SIGNED_VAR(self, other):
-        for sv in self.signed_vars:
-            if sv.name == other.name:
-                if sv.sign == other.sign:
-                    return other
-                else:
-                    break
-        assert False
+        return AndClause_OR_SignedVar(self, other)
 
     def AND_SIGNED_VAR(self, other):
         return self.AND_AND_CLAUSE(AndClause([other]))
 
     def AND_AND_CLAUSE(self, other):
-        names = self.names | other.names
-        negated_names = self.negated_names | other.negated_names
-        if names & negated_names:
-            return FALSE
-        return AndClause.make(names, negated_names)
+        return AndClause_AND_AndClause(self, other)
 
     def NOT(self):
         return OrClause.make(self.negated_names, self.names)
