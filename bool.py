@@ -104,7 +104,7 @@ class SignedVar(Expression):
         return SignedVar(self.name, not self.sign)
 
 
-class OrClause(Expression):
+class Clause(Expression):
     def __init__(self, signed_vars):
         self.signed_vars = signed_vars
         names = {sv.name for sv in signed_vars if sv.sign}
@@ -113,14 +113,25 @@ class OrClause(Expression):
         self.names = names
         self.negated_names = negated_names
 
-    def __str__(self):
+    def stringified_vars(self):
         signed_vars = sorted(list(self.signed_vars), key=lambda sv: sv.name)
-        return "|".join(str(sv) for sv in signed_vars)
+        return [str(sv) for sv in signed_vars]
 
     def simplify(self):
         if len(self.signed_vars) == 1:
             return self.signed_vars[0]
         return self
+
+    @staticmethod
+    def make_signed_vars(names, negated_names):
+        return [SignedVar(name, True) for name in names] + [
+            SignedVar(name, False) for name in negated_names
+        ]
+
+
+class OrClause(Clause):
+    def __str__(self):
+        return "|".join(self.stringified_vars())
 
     def AND_SIGNED_VAR(self, other):
         found = False
@@ -149,9 +160,7 @@ class OrClause(Expression):
 
     @staticmethod
     def make(names, negated_names):
-        signed_vars = [SignedVar(name, True) for name in names] + [
-            SignedVar(name, False) for name in negated_names
-        ]
+        signed_vars = Clause.make_signed_vars(names, negated_names)
         return OrClause(signed_vars)
 
 
