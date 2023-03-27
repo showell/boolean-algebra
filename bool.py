@@ -41,6 +41,9 @@ class Expression:
 
         assert False
 
+    def NOT(self):
+        assert False
+
     def AND_VAR(self, other):
         assert False
 
