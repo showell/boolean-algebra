@@ -62,8 +62,10 @@ def idemptotence():
 
 @run_test
 def absorption():
+    assert_str((x | y) & x, "x")
     assert_str(x & (x | y), "x")
     assert_str(x | (x & y), "x")
+    assert_str((x & y) | x, "x")
 
 
 @run_test
@@ -101,13 +103,6 @@ def negated_or_clauses():
     assert_str((z | x) | ~x, "T")
     assert_str((~z | x) | (y | ~z), "x|y|~z")
     assert_str((x | z) | (x | ~z), "T")
-
-
-@run_test
-def or_clauses_and_var():
-    assert_str((x | y) & x, "x")
-    assert_str(x & (~x | y), "y")
-    assert_str((~x | y) & x, "y")
 
 
 @run_test

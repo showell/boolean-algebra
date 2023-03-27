@@ -146,18 +146,12 @@ class OrClause(Clause):
         return "|".join(self.stringified_vars())
 
     def AND_SIGNED_VAR(self, other):
-        found = False
-        signed_vars = []
         for sv in self.signed_vars:
             if sv.name == other.name:
                 if sv.sign == other.sign:
                     return other
                 else:
-                    found = True
-            else:
-                signed_vars.append(sv)
-        if found:
-            return OrClause(signed_vars)
+                    assert False
         assert False
 
     def OR_SIGNED_VAR(self, other):
@@ -181,18 +175,12 @@ class AndClause(Clause):
         return "&".join(self.stringified_vars())
 
     def OR_SIGNED_VAR(self, other):
-        found = False
-        signed_vars = []
         for sv in self.signed_vars:
             if sv.name == other.name:
                 if sv.sign == other.sign:
                     return other
                 else:
-                    found = True
-            else:
-                signed_vars.append(sv)
-        if found:
-            return AndClause(signed_vars)
+                    assert False
         assert False
 
     def AND_SIGNED_VAR(self, other):
