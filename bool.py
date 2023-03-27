@@ -19,7 +19,7 @@ class Expression:
             return FALSE
 
         if type(other) == SignedVar:
-            return self.AND_SIGNED_VAR(other)
+            return self.AND_SIGNED_VAR(other).simplify()
 
         if type(other) == OrClause:
             return self.AND_OR_CLAUSE(other).simplify()
@@ -37,7 +37,7 @@ class Expression:
             return self
 
         if type(other) == SignedVar:
-            return self.OR_SIGNED_VAR(other)
+            return self.OR_SIGNED_VAR(other).simplify()
 
         if type(other) == OrClause:
             return self.OR_OR_CLAUSE(other).simplify()
@@ -46,12 +46,6 @@ class Expression:
             return self.OR_AND_CLAUSE(other).simplify()
 
         assert False
-
-    def NOT(self):
-        assert False
-
-    def OR_OR_CLAUSE(self, other):
-        return False
 
 
 class TrueVal(Expression):
@@ -118,6 +112,8 @@ class SignedVar(Expression):
 
 class Clause(Expression):
     def __init__(self, signed_vars):
+        for sv in signed_vars:
+            assert type(sv) == SignedVar
         self.signed_vars = signed_vars
         names = {sv.name for sv in signed_vars if sv.sign}
         negated_names = {sv.name for sv in signed_vars if not sv.sign}
@@ -133,6 +129,9 @@ class Clause(Expression):
         if len(self.signed_vars) == 1:
             return self.signed_vars[0]
         return self
+
+    def NOT(self):
+        return AndClause.make(self.negated_names, self.names)
 
     @staticmethod
     def make_signed_vars(names, negated_names):
@@ -151,7 +150,7 @@ class OrClause(Clause):
                 if sv.sign == other.sign:
                     return other
                 else:
-                    assert False
+                    break
         assert False
 
     def OR_SIGNED_VAR(self, other):
@@ -180,7 +179,7 @@ class AndClause(Clause):
                 if sv.sign == other.sign:
                     return other
                 else:
-                    assert False
+                    break
         assert False
 
     def AND_SIGNED_VAR(self, other):
@@ -192,6 +191,9 @@ class AndClause(Clause):
         if names & negated_names:
             return FALSE
         return AndClause.make(names, negated_names)
+
+    def NOT(self):
+        return OrClause.make(self.negated_names, self.names)
 
     @staticmethod
     def make(names, negated_names):

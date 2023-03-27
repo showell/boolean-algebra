@@ -78,6 +78,12 @@ def complementation():
 
 
 @run_test
+def de_morgan():
+    assert_str(~(x & y), "~x|~y")
+    assert_str(~(x | y), "~x&~y")
+
+
+@run_test
 def simple_or_clauses():
     assert_str(x | y, "x|y")
     assert_str(z | y | x, "x|y|z")
