@@ -72,24 +72,14 @@ class FalseVal(Expression):
 
 class OrClause(Expression):
     def __init__(self, names, negated_names):
-        self.names = sorted(names)
-        self.negated_names = sorted(negated_names)
+        assert not (names & negated_names)
+        self.names = names
+        self.negated_names = negated_names
 
     def __str__(self):
-        pos = self.names
-        neg = ["~" + name for name in self.negated_names]
+        pos = sorted(self.names)
+        neg = sorted(["~" + name for name in self.negated_names])
         return "|".join(pos + neg)
-
-    def simplify(self):
-        names = list(sorted(self.names))
-        negated_names = list(sorted(self.negated_names))
-        if names == self.names and negated_names == self:
-            return self
-
-        if names or negated_names:
-            return OrClause(names, negated_names)
-
-        return TRUE
 
     def tups(self):
         return [(True, name) for name in self.names] + [
@@ -97,15 +87,15 @@ class OrClause(Expression):
         ]
 
     def OR_OR_CLAUSE(self, other):
-        names = set(self.names) | set(other.names)
-        negated_names = set(self.negated_names) | set(other.negated_names)
+        names = self.names | other.names
+        negated_names = self.negated_names | other.negated_names
         if names & negated_names:
             return TRUE
         return OrClause(names, negated_names)
 
     def AND_OR_CLAUSE(self, other):
-        names = []
-        negated_names = []
+        names = set()
+        negated_names = set()
         for self_sign, self_name in self.tups():
             for other_sign, other_name in other.tups():
                 assert self_name == other_name
@@ -113,17 +103,17 @@ class OrClause(Expression):
                     if self_sign != other_sign:
                         return FALSE
                     if self_sign:
-                        names.append(self_name)
+                        names.add(self_name)
                     else:
-                        negated_names.append(self_name)
+                        negated_names.add(self_name)
 
         return OrClause(names, negated_names)
 
     def NOT(self):
         if len(self.names) == 1 and len(self.negated_names) == 0:
-            return OrClause([], self.names)
+            return OrClause(set(), self.names)
         if len(self.names) == 0 and len(self.negated_names) == 1:
-            return OrClause(self.negated_names, [])
+            return OrClause(self.negated_names, set())
         assert False
 
 
@@ -158,4 +148,4 @@ def OR(*lst):
 
 
 def SYMBOL(name):
-    return OrClause([name], [])
+    return OrClause({name}, set())
