@@ -65,17 +65,17 @@ def negated_or_clauses():
     assert_str(x | ~y, "x|~y")
     assert_str(~y | x, "x|~y")
 
-    assert_str(z | x | ~y, "x|z|~y")
-    assert_str(z | ~y | x, "x|z|~y")
+    assert_str(z | x | ~y, "x|~y|z")
+    assert_str(z | ~y | x, "x|~y|z")
 
-    assert_str(z | x | ~y | w, "w|x|z|~y")
-    assert_str(z | x | ~y | ~w, "x|z|~w|~y")
+    assert_str(z | x | ~y | w, "w|x|~y|z")
+    assert_str(z | x | ~y | ~w, "~w|x|~y|z")
 
-    assert_str(z | x | ~y | w | z, "w|x|z|~y")
-    assert_str(z | x | ~y | ~w | z, "x|z|~w|~y")
+    assert_str(z | x | ~y | w | z, "w|x|~y|z")
+    assert_str(z | x | ~y | ~w | z, "~w|x|~y|z")
 
-    assert_str((z | x) | (~y | w | z), "w|x|z|~y")
-    assert_str((z | x) | (~y | ~w | z), "x|z|~w|~y")
+    assert_str((z | x) | (~y | w | z), "w|x|~y|z")
+    assert_str((z | x) | (~y | ~w | z), "~w|x|~y|z")
 
     assert_str((z | x) | ~x, "T")
     assert_str((~z | x) | (y | ~z), "x|y|~z")

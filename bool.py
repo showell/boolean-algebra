@@ -18,6 +18,9 @@ class Expression:
         if type(other) == FalseVal:
             return FALSE
 
+        if type(other) == SignedVar:
+            return self.AND_SIGNED_VAR(other)
+
         if type(other) == OrClause:
             return self.AND_OR_CLAUSE(other).simplify()
 
@@ -29,6 +32,9 @@ class Expression:
 
         if type(other) == FalseVal:
             return self
+
+        if type(other) == SignedVar:
+            return self.OR_SIGNED_VAR(other)
 
         if type(other) == OrClause:
             return self.OR_OR_CLAUSE(other).simplify()
@@ -69,55 +75,62 @@ class FalseVal(Expression):
     def NOT(self):
         return TRUE
 
+class SignedVar(Expression):
+    def __init__(self, name, sign):
+        self.name = name
+        self.sign = sign
+
+    def __str__(self):
+        return self.name if self.sign else "~" + self.name
+
+    def AND_SIGNED_VAR(self, other):
+        if other.name == self.name:
+            return self if self.sign == other.sign else FALSE
+        assert False
+ 
+    def OR_SIGNED_VAR(self, other):
+        if other.name == self.name:
+            return self if self.sign == other.sign else TRUE
+        return OrClause([self, other])
+
+    def OR_OR_CLAUSE(self, other):
+        return other.OR_SIGNED_VAR(self)
+
+    def AND_OR_CLAUSE(self, other):
+        return other.AND_SIGNED_VAR(self)
+
+    def NOT(self):
+        return SignedVar(self.name, not self.sign)
+        
 
 class OrClause(Expression):
-    def __init__(self, names, negated_names):
+    def __init__(self, signed_vars):
+        self.signed_vars = signed_vars
+        names = {sv.name for sv in signed_vars if sv.sign}
+        negated_names = {sv.name for sv in signed_vars if not sv.sign}
         assert not (names & negated_names)
         self.names = names
         self.negated_names = negated_names
 
     def __str__(self):
-        pos = sorted(self.names)
-        neg = sorted(["~" + name for name in self.negated_names])
-        return "|".join(pos + neg)
+        signed_vars = sorted(list(self.signed_vars), key=lambda sv: sv.name)
+        return "|".join(str(sv) for sv in signed_vars)
 
-    def tups(self):
-        return [(True, name) for name in self.names] + [
-            (False, name) for name in self.negated_names
-        ]
+    def OR_SIGNED_VAR(self, other):
+        return self.OR_OR_CLAUSE(OrClause([other]))
 
     def OR_OR_CLAUSE(self, other):
         names = self.names | other.names
         negated_names = self.negated_names | other.negated_names
         if names & negated_names:
             return TRUE
-        return OrClause(names, negated_names)
+        return OrClause.make(names, negated_names)
 
-    def AND_OR_CLAUSE(self, other):
-        names = set()
-        negated_names = set()
-        for self_sign, self_name in self.tups():
-            for other_sign, other_name in other.tups():
-                assert self_name == other_name
-                if self_name == other_name:
-                    if self_sign != other_sign:
-                        continue
-                    if self_sign:
-                        names.add(self_name)
-                    else:
-                        negated_names.add(self_name)
-
-        if names or negated_names:
-            return OrClause(names, negated_names)
-
-        return FALSE
-
-    def NOT(self):
-        if len(self.names) == 1 and len(self.negated_names) == 0:
-            return OrClause(set(), self.names)
-        if len(self.names) == 0 and len(self.negated_names) == 1:
-            return OrClause(self.negated_names, set())
-        assert False
+    @staticmethod
+    def make(names, negated_names):
+        signed_vars = [SignedVar(name, True) for name in names] + [SignedVar(name, False) for name in negated_names]
+        return OrClause(signed_vars)
+        
 
 
 TRUE = TrueVal()
@@ -151,4 +164,4 @@ def OR(*lst):
 
 
 def SYMBOL(name):
-    return OrClause({name}, set())
+    return SignedVar(name, True)
