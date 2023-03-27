@@ -1,29 +1,11 @@
-from bool import TRUE, FALSE, AND, OR, NOT, SYMBOL
+from bool import TRUE, FALSE, SYMBOL
 from lib.test_helpers import run_test, assert_str
 
 T = TRUE
 F = FALSE
 x = SYMBOL("x")
-
-
-@run_test
-def simple():
-    assert_str(T, "T")
-    assert_str(F, "F")
-    assert_str(AND(F, T), "F")
-    assert_str(OR(F, T), "T")
-    assert_str(AND(T, T, F), "F")
-    assert_str(OR(F, T, T), "T")
-
-    assert_str(x, "x")
-    assert_str(AND(x, x), "x")
-    assert_str(OR(x, x), "x")
-
-    assert_str(AND(x, T), "x")
-    assert_str(OR(x, T), "T")
-
-    assert_str(AND(x, F), "F")
-    assert_str(OR(x, F), "x")
+y = SYMBOL("y")
+z = SYMBOL("z")
 
 
 @run_test
@@ -68,3 +50,9 @@ def complementation():
 
     assert_str(~x & x, "F")
     assert_str(~x | x, "T")
+
+
+@run_test
+def simple_or_clauses():
+    assert_str(x | y, "x|y")
+    assert_str(z | y | x, "x|y|z")
