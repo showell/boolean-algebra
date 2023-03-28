@@ -11,62 +11,26 @@ z = SYMBOL("z")
 
 
 @run_test
-def restriction():
-    assert not T.RESTRICTS(x)
-    assert not x.RESTRICTS(y)
-    assert not x.RESTRICTS(y & z)
-    assert not (y & x).RESTRICTS(z)
-    assert not x.RESTRICTS(~x)
-    assert not x.RESTRICTS(y | z)
-    assert not (x & y & z).RESTRICTS(w & x)
-    assert not (x | w).RESTRICTS(x | y | z)
-
-    assert F.RESTRICTS(T)
-    assert F.RESTRICTS(x)
-    assert F.RESTRICTS(x & y)
-    assert x.RESTRICTS(T)
-    assert (x & y).RESTRICTS(x)
-    assert x.RESTRICTS(x)
-    assert x.RESTRICTS(x | y)
-    assert (x | y).RESTRICTS(x | y | z)
-    assert (x & y & z).RESTRICTS(x & y)
-
-    assert T.LOOSENS(F)
-    assert T.LOOSENS(x)
-    assert T.LOOSENS(x | y)
-    assert (x | y).LOOSENS(x)
-
-
-@run_test
-def negated_vars():
-    assert_str(~x, "~x")
-
-    assert_str(~x & ~x, "~x")
-    assert_str(~x | ~x, "~x")
-
-
-@run_test
-def double_negation():
-    assert_str(~~x, "x")
-    assert_str(~~~~x, "x")
-
-    assert_str(~~~x, "~x")
-    assert_str(~~~~~x, "~x")
-
-
-@run_test
 def associativity():
     assert_str(x & (y & z), "x&y&z")
     assert_str(x | (y | z), "x|y|z")
+
+    assert_str(x & (z & y), "x&y&z")
+    assert_str(x | (z | y), "x|y|z")
+
+    assert_str((x & z) & y, "x&y&z")
+    assert_str((x | z) | y, "x|y|z")
 
 
 @run_test
 def commutativity():
     assert_str(y & x, "x&y")
     assert_str(x & y, "x&y")
+    assert_str(z & x & y, "x&y&z")
 
     assert_str(y | x, "x|y")
     assert_str(x | y, "x|y")
+    assert_str(z | x | y, "x|y|z")
 
 
 @run_test
@@ -120,9 +84,56 @@ def complementation():
 
 
 @run_test
+def double_negation():
+    assert_str(~~x, "x")
+    assert_str(~~~~x, "x")
+
+    assert_str(~~~x, "~x")
+    assert_str(~~~~~x, "~x")
+
+
+@run_test
 def de_morgan():
     assert_str(~(x & y), "~x|~y")
     assert_str(~(x | y), "~x&~y")
+
+
+# OTHER
+
+
+@run_test
+def negated_vars():
+    assert_str(~x, "~x")
+
+    assert_str(~x & ~x, "~x")
+    assert_str(~x | ~x, "~x")
+
+
+@run_test
+def restriction():
+    assert not T.RESTRICTS(x)
+    assert not x.RESTRICTS(y)
+    assert not x.RESTRICTS(y & z)
+    assert not (y & x).RESTRICTS(z)
+    assert not x.RESTRICTS(~x)
+    assert not x.RESTRICTS(y | z)
+    assert not (x & y & z).RESTRICTS(w & x)
+    assert not (x | w).RESTRICTS(x | y | z)
+
+    assert F.RESTRICTS(T)
+    assert F.RESTRICTS(x)
+    assert F.RESTRICTS(x & y)
+    assert x.RESTRICTS(T)
+    assert (x & y).RESTRICTS(x)
+    assert x.RESTRICTS(x)
+    assert x.RESTRICTS(x | y)
+    assert (x | y).RESTRICTS(x | y | z)
+    assert (x & y & z).RESTRICTS(x & y)
+
+    assert T.LOOSENS(F)
+    assert T.LOOSENS(x)
+    assert T.LOOSENS(x | y)
+    assert (x | y).LOOSENS(x)
 
 
 @run_test
