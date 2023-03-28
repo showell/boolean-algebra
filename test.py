@@ -69,6 +69,15 @@ def absorption():
 
 
 @run_test
+def negative_absorption():
+    assert_str(x & (~x | y), "x&y")
+    assert_str((~x | y) & x, "x&y")
+
+    assert_str(x | (~x & y), "x|y")
+    assert_str((~x & y) | x, "x|y")
+
+
+@run_test
 def complementation():
     assert_str(x & ~x, "F")
     assert_str(x | ~x, "T")

@@ -174,12 +174,22 @@ def AndClause_OR_SignedVar(clause, signed_var):
     if expr is not None:
         return expr
 
+    exprs = [sv.OR(signed_var) for sv in clause.signed_vars]
+    exprs = [expr for expr in exprs if type(expr) != TrueVal]
+    if len(exprs) == 1:
+        return exprs[0]
+
 
 @_AND(OrClause, SignedVar)
 def OrClause_AND_SignedVar(clause, signed_var):
     expr = try_positive_absorb(clause, signed_var)
     if expr is not None:
         return expr
+
+    exprs = [sv.AND(signed_var) for sv in clause.signed_vars]
+    exprs = [expr for expr in exprs if type(expr) != FalseVal]
+    if len(exprs) == 1:
+        return exprs[0]
 
 
 @_OR(OrClause, SignedVar)
