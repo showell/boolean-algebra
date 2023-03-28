@@ -15,14 +15,11 @@ class Expression:
     def __invert__(self):
         return self.NOT()
 
-    def simplify(self):
-        return self
-
     def AND(self, other):
-        return dispatch_and(self, other).simplify()
+        return dispatch_and(self, other)
 
     def OR(self, other):
-        return dispatch_or(self, other).simplify()
+        return dispatch_or(self, other)
 
 
 class TrueVal(Expression):
@@ -68,11 +65,6 @@ class Clause(Expression):
         signed_vars = sorted(list(self.signed_vars), key=lambda sv: sv.name)
         return [str(sv) for sv in signed_vars]
 
-    def simplify(self):
-        if len(self.signed_vars) == 1:
-            return self.signed_vars[0]
-        return self
-
     @staticmethod
     def make_signed_vars(names, negated_names):
         return [SignedVar(name, True) for name in names] + [
@@ -90,7 +82,7 @@ class OrClause(Clause):
     @staticmethod
     def make(names, negated_names):
         signed_vars = Clause.make_signed_vars(names, negated_names)
-        return OrClause(signed_vars).simplify()
+        return OrClause(signed_vars)
 
 
 class AndClause(Clause):
@@ -98,7 +90,7 @@ class AndClause(Clause):
         return "&".join(self.stringified_vars())
 
     def NOT(self):
-        return OrClause.make(self.negated_names, self.names).simplify()
+        return OrClause.make(self.negated_names, self.names)
 
     @staticmethod
     def make(names, negated_names):
