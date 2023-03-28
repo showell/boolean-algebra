@@ -19,10 +19,10 @@ class Expression:
         return self
 
     def AND(self, other):
-        return dispatch_and(self, other)
+        return dispatch_and(self, other).simplify()
 
     def OR(self, other):
-        return dispatch_or(self, other)
+        return dispatch_or(self, other).simplify()
 
 
 class TrueVal(Expression):
@@ -90,7 +90,7 @@ class OrClause(Clause):
     @staticmethod
     def make(names, negated_names):
         signed_vars = Clause.make_signed_vars(names, negated_names)
-        return OrClause(signed_vars)
+        return OrClause(signed_vars).simplify()
 
 
 class AndClause(Clause):
@@ -98,7 +98,7 @@ class AndClause(Clause):
         return "&".join(self.stringified_vars())
 
     def NOT(self):
-        return OrClause.make(self.negated_names, self.names)
+        return OrClause.make(self.negated_names, self.names).simplify()
 
     @staticmethod
     def make(names, negated_names):
