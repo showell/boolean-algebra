@@ -27,16 +27,7 @@ class Expression:
         if type(other) == FalseVal:
             return self
 
-        if type(other) == SignedVar:
-            return self.OR_SIGNED_VAR(other).simplify()
-
-        if type(other) == OrClause:
-            return self.OR_OR_CLAUSE(other).simplify()
-
-        if type(other) == AndClause:
-            return self.OR_AND_CLAUSE(other).simplify()
-
-        assert False
+        return dispatch_or(self, other)
 
 
 class TrueVal(Expression):
@@ -75,15 +66,6 @@ class SignedVar(Expression):
     def __str__(self):
         return self.name if self.sign else "~" + self.name
 
-    def OR(self, other):
-        if type(other) == SignedVar:
-            return self.OR_SIGNED_VAR(other)
-        else:
-            return other.OR(self)
-
-    def OR_SIGNED_VAR(self, other):
-        return SignedVar_OR_SignedVar(self, other)
-
     def NOT(self):
         return SignedVar(self.name, not self.sign)
 
@@ -119,12 +101,6 @@ class OrClause(Clause):
     def __str__(self):
         return "|".join(self.stringified_vars())
 
-    def OR_SIGNED_VAR(self, other):
-        return OrClause_OR_SignedVar(self, other)
-
-    def OR_OR_CLAUSE(self, other):
-        return OrClause_OR_OrClause(self, other)
-
     def NOT(self):
         return AndClause.make(self.negated_names, self.names)
 
@@ -137,9 +113,6 @@ class OrClause(Clause):
 class AndClause(Clause):
     def __str__(self):
         return "&".join(self.stringified_vars())
-
-    def OR_SIGNED_VAR(self, other):
-        return AndClause_OR_SignedVar(self, other)
 
     def NOT(self):
         return OrClause.make(self.negated_names, self.names)
@@ -159,14 +132,15 @@ def SYMBOL(name):
 
 
 _AND_TUPLES = []
+_OR_TUPLES = []
 
 
-def dispatch_and(x, y):
+def dispatch(tuples, x, y):
     for (
         type1,
         type2,
         f,
-    ) in _AND_TUPLES:
+    ) in tuples:
         if type(x) == type1 and type(y) == type2:
             return f(x, y)
         if type(x) == type2 and type(y) == type1:
@@ -174,10 +148,27 @@ def dispatch_and(x, y):
     assert False
 
 
+def dispatch_and(x, y):
+    return dispatch(_AND_TUPLES, x, y)
+
+
+def dispatch_or(x, y):
+    return dispatch(_OR_TUPLES, x, y)
+
+
 def _AND(type1, type2):
     def wrap(f):
         assert f.__name__ == type1.__name__ + "_AND_" + type2.__name__
         _AND_TUPLES.append((type1, type2, f))
+        return f
+
+    return wrap
+
+
+def _OR(type1, type2):
+    def wrap(f):
+        assert f.__name__ == type1.__name__ + "_OR_" + type2.__name__
+        _OR_TUPLES.append((type1, type2, f))
         return f
 
     return wrap
@@ -190,6 +181,7 @@ def SignedVar_AND_SignedVar(x, y):
     return AndClause([x, y])
 
 
+@_OR(SignedVar, SignedVar)
 def SignedVar_OR_SignedVar(x, y):
     if x.name == y.name:
         return x if x.sign == y.sign else TRUE
@@ -205,6 +197,7 @@ def AndClause_AND_AndClause(x, y):
     return AndClause.make(names, negated_names)
 
 
+@_OR(OrClause, OrClause)
 def OrClause_OR_OrClause(x, y):
     names = x.names | y.names
     negated_names = x.negated_names | y.negated_names
@@ -213,6 +206,7 @@ def OrClause_OR_OrClause(x, y):
     return OrClause.make(names, negated_names)
 
 
+@_OR(AndClause, SignedVar)
 def AndClause_OR_SignedVar(clause, signed_var):
     for sv in clause.signed_vars:
         if sv.name == signed_var.name:
@@ -234,6 +228,7 @@ def OrClause_AND_SignedVar(clause, signed_var):
     assert False
 
 
+@_OR(OrClause, SignedVar)
 def OrClause_OR_SignedVar(clause, signed_var):
     return OrClause_OR_OrClause(clause, OrClause([signed_var]))
 
