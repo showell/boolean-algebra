@@ -1,20 +1,11 @@
 class Expression:
     def __and__(self, other):
-        return self.AND(other)
-
-    def __or__(self, other):
-        return self.OR(other)
-
-    def __invert__(self):
-        return self.NOT()
-
-    def AND(self, other):
         return AndPair(self, other)
 
-    def OR(self, other):
+    def __or__(self, other):
         return OrPair(self, other)
 
-    def NOT(self):
+    def __invert__(self):
         return Negated(self)
 
     def symbols(self):
@@ -25,10 +16,16 @@ class TrueVal(Expression):
     def __str__(self):
         return "T"
 
+    def eval(self, _):
+        return True
+
 
 class FalseVal(Expression):
     def __str__(self):
         return "F"
+
+    def eval(self, _):
+        return False
 
 
 class Negated(Expression):
@@ -37,6 +34,9 @@ class Negated(Expression):
 
     def __str__(self):
         return "~" + str(self.x)
+
+    def eval(self, tvars):
+        return not self.x.eval(tvars)
 
 
 class Symbol(Expression):
@@ -48,6 +48,9 @@ class Symbol(Expression):
 
     def symbols(self):
         return {self.name}
+
+    def eval(self, tvars):
+        return self.name in tvars
 
 
 class Pair(Expression):
@@ -65,12 +68,19 @@ class Pair(Expression):
         op = self.operator
         return op.join(self.string_variables())
 
+
 class AndPair(Pair):
     operator = "&"
+
+    def eval(self, tvars):
+        return self.x.eval(tvars) and self.y.eval(tvars)
 
 
 class OrPair(Pair):
     operator = "|"
+
+    def eval(self, tvars):
+        return self.x.eval(tvars) or self.y.eval(tvars)
 
 
 TRUE = TrueVal()
