@@ -12,33 +12,15 @@ class Expression:
         return self
 
     def AND(self, other):
-        if type(other) == TrueVal:
-            return self
-
-        if type(other) == FalseVal:
-            return FALSE
-
         return dispatch_and(self, other)
 
     def OR(self, other):
-        if type(other) == TrueVal:
-            return TRUE
-
-        if type(other) == FalseVal:
-            return self
-
         return dispatch_or(self, other)
 
 
 class TrueVal(Expression):
     def __str__(self):
         return "T"
-
-    def AND(self, other):
-        return other
-
-    def OR(self, other):
-        return TRUE
 
     def NOT(self):
         return FALSE
@@ -47,12 +29,6 @@ class TrueVal(Expression):
 class FalseVal(Expression):
     def __str__(self):
         return "F"
-
-    def AND(self, other):
-        return FALSE
-
-    def OR(self, other):
-        return other
 
     def NOT(self):
         return TRUE
@@ -141,10 +117,14 @@ def dispatch(tuples, x, y):
         type2,
         f,
     ) in tuples:
-        if type(x) == type1 and type(y) == type2:
-            return f(x, y)
-        if type(x) == type2 and type(y) == type1:
-            return f(y, x)
+        if isinstance(x, type1) and isinstance(y, type2):
+            result = f(x, y)
+            if result is not None:
+                return result
+        if isinstance(x, type2) and isinstance(y, type1):
+            result = f(y, x)
+            if result is not None:
+                return result
     assert False
 
 
@@ -173,6 +153,21 @@ def _OR(type1, type2):
 
     return wrap
 
+@_AND(TrueVal, Expression)
+def TrueVal_AND_Expression(_, x):
+    return x
+
+@_AND(FalseVal, Expression)
+def FalseVal_AND_Expression(_, x):
+    return FALSE
+
+@_OR(TrueVal, Expression)
+def TrueVal_OR_Expression(_, x):
+    return TRUE
+
+@_OR(FalseVal, Expression)
+def FalseVal_OR_Expression(_, x):
+    return x
 
 @_AND(SignedVar, SignedVar)
 def SignedVar_AND_SignedVar(x, y):
@@ -214,7 +209,7 @@ def AndClause_OR_SignedVar(clause, signed_var):
                 return signed_var
             else:
                 break
-    assert False
+    return None
 
 
 @_AND(OrClause, SignedVar)
@@ -225,7 +220,7 @@ def OrClause_AND_SignedVar(clause, signed_var):
                 return signed_var
             else:
                 break
-    assert False
+    return None
 
 
 @_OR(OrClause, SignedVar)
