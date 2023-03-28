@@ -145,6 +145,16 @@ FALSE = FalseVal()
 def SYMBOL(name):
     return SignedVar(name, True)
 
+def eliminate_resticting_terms(exprs):
+    reject_tups = set()
+    for i in range(len(exprs)):
+        for j in range(len(exprs)):
+            if i != j and (j, i) not in reject_tups:
+                if exprs[i].RESTRICTS(exprs[j]):
+                    reject_tups.add((i, j))
+
+    rejects = {i for i, j in reject_tups}
+    return [exprs[i] for i in range(len(exprs)) if i not in rejects]
 
 @_AND(TrueVal, Expression)
 def TrueVal_AND_Expression(_, x):
@@ -218,12 +228,8 @@ def AndClause_OR_SignedVar(clause, signed_var):
 
 @_AND(OrClause, SignedVar)
 def OrClause_AND_SignedVar(clause, signed_var):
-    expr = try_positive_absorb(clause, signed_var)
-    if expr is not None:
-        return expr
-
     exprs = [sv.AND(signed_var) for sv in clause.signed_vars]
-    exprs = [expr for expr in exprs if not expr.IS_FALSE()]
+    exprs = eliminate_resticting_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
 
