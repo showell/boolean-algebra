@@ -22,6 +22,12 @@ class Expression:
     def OR(self, other):
         return dispatch_or(self, other)
 
+    def IS_TRUE(self):
+        return False
+
+    def IS_FALSE(self):
+        return False
+
 
 class TrueVal(Expression):
     def __str__(self):
@@ -30,6 +36,9 @@ class TrueVal(Expression):
     def NOT(self):
         return FALSE
 
+    def IS_TRUE(self):
+        return True
+
 
 class FalseVal(Expression):
     def __str__(self):
@@ -37,6 +46,9 @@ class FalseVal(Expression):
 
     def NOT(self):
         return TRUE
+
+    def IS_FALSE(self):
+        return True
 
 
 class SignedVar(Expression):
@@ -175,7 +187,7 @@ def AndClause_OR_SignedVar(clause, signed_var):
         return expr
 
     exprs = [sv.OR(signed_var) for sv in clause.signed_vars]
-    exprs = [expr for expr in exprs if type(expr) != TrueVal]
+    exprs = [expr for expr in exprs if not expr.IS_TRUE()]
     if len(exprs) == 1:
         return exprs[0]
 
@@ -187,7 +199,7 @@ def OrClause_AND_SignedVar(clause, signed_var):
         return expr
 
     exprs = [sv.AND(signed_var) for sv in clause.signed_vars]
-    exprs = [expr for expr in exprs if type(expr) != FalseVal]
+    exprs = [expr for expr in exprs if not expr.IS_FALSE()]
     if len(exprs) == 1:
         return exprs[0]
 
