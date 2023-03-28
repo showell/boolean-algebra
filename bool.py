@@ -18,16 +18,7 @@ class Expression:
         if type(other) == FalseVal:
             return FALSE
 
-        if type(other) == SignedVar:
-            return self.AND_SIGNED_VAR(other).simplify()
-
-        if type(other) == OrClause:
-            return self.AND_OR_CLAUSE(other).simplify()
-
-        if type(other) == AndClause:
-            return self.AND_AND_CLAUSE(other).simplify()
-
-        assert False
+        return dispatch_and(self, other)
 
     def OR(self, other):
         if type(other) == TrueVal:
@@ -84,15 +75,6 @@ class SignedVar(Expression):
     def __str__(self):
         return self.name if self.sign else "~" + self.name
 
-    def AND(self, other):
-        if type(other) == SignedVar:
-            return self.AND_SIGNED_VAR(other)
-        else:
-            return other.AND(self)
-
-    def AND_SIGNED_VAR(self, other):
-        return SignedVar_AND_SignedVar(self, other)
-
     def OR(self, other):
         if type(other) == SignedVar:
             return self.OR_SIGNED_VAR(other)
@@ -137,9 +119,6 @@ class OrClause(Clause):
     def __str__(self):
         return "|".join(self.stringified_vars())
 
-    def AND_SIGNED_VAR(self, other):
-        return OrClause_AND_SignedVar(self, other)
-
     def OR_SIGNED_VAR(self, other):
         return OrClause_OR_SignedVar(self, other)
 
@@ -154,18 +133,13 @@ class OrClause(Clause):
         signed_vars = Clause.make_signed_vars(names, negated_names)
         return OrClause(signed_vars)
 
+
 class AndClause(Clause):
     def __str__(self):
         return "&".join(self.stringified_vars())
 
     def OR_SIGNED_VAR(self, other):
         return AndClause_OR_SignedVar(self, other)
-
-    def AND_SIGNED_VAR(self, other):
-        return AndClause_AND_SignedVar(self, other)
-
-    def AND_AND_CLAUSE(self, other):
-        return AndClause_AND_AndClause(self, other)
 
     def NOT(self):
         return OrClause.make(self.negated_names, self.names)
@@ -183,16 +157,46 @@ FALSE = FalseVal()
 def SYMBOL(name):
     return SignedVar(name, True)
 
+
+_AND_TUPLES = []
+
+
+def dispatch_and(x, y):
+    for (
+        type1,
+        type2,
+        f,
+    ) in _AND_TUPLES:
+        if type(x) == type1 and type(y) == type2:
+            return f(x, y)
+        if type(x) == type2 and type(y) == type1:
+            return f(y, x)
+    assert False
+
+
+def _AND(type1, type2):
+    def wrap(f):
+        assert f.__name__ == type1.__name__ + "_AND_" + type2.__name__
+        _AND_TUPLES.append((type1, type2, f))
+        return f
+
+    return wrap
+
+
+@_AND(SignedVar, SignedVar)
 def SignedVar_AND_SignedVar(x, y):
     if x.name == y.name:
         return x if x.sign == y.sign else FALSE
     return AndClause([x, y])
+
 
 def SignedVar_OR_SignedVar(x, y):
     if x.name == y.name:
         return x if x.sign == y.sign else TRUE
     return OrClause([x, y])
 
+
+@_AND(AndClause, AndClause)
 def AndClause_AND_AndClause(x, y):
     names = x.names | y.names
     negated_names = x.negated_names | y.negated_names
@@ -200,12 +204,14 @@ def AndClause_AND_AndClause(x, y):
         return FALSE
     return AndClause.make(names, negated_names)
 
+
 def OrClause_OR_OrClause(x, y):
     names = x.names | y.names
     negated_names = x.negated_names | y.negated_names
     if names & negated_names:
         return TRUE
     return OrClause.make(names, negated_names)
+
 
 def AndClause_OR_SignedVar(clause, signed_var):
     for sv in clause.signed_vars:
@@ -216,6 +222,8 @@ def AndClause_OR_SignedVar(clause, signed_var):
                 break
     assert False
 
+
+@_AND(OrClause, SignedVar)
 def OrClause_AND_SignedVar(clause, signed_var):
     for sv in clause.signed_vars:
         if sv.name == signed_var.name:
@@ -225,9 +233,11 @@ def OrClause_AND_SignedVar(clause, signed_var):
                 break
     assert False
 
+
 def OrClause_OR_SignedVar(clause, signed_var):
     return OrClause_OR_OrClause(clause, OrClause([signed_var]))
 
+
+@_AND(AndClause, SignedVar)
 def AndClause_AND_SignedVar(clause, signed_var):
     return AndClause_AND_AndClause(clause, AndClause([signed_var]))
-
