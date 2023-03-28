@@ -28,6 +28,9 @@ class Expression:
     def IS_FALSE(self):
         return False
 
+    def RESTRICTS(self, other):
+        return False
+
 
 class TrueVal(Expression):
     def __str__(self):
@@ -50,6 +53,9 @@ class FalseVal(Expression):
     def IS_FALSE(self):
         return True
 
+    def RESTRICTS(self, other):
+        return True
+
 
 class SignedVar(Expression):
     def __init__(self, name, sign):
@@ -64,6 +70,15 @@ class SignedVar(Expression):
 
     def NOT(self):
         return SignedVar(self.name, not self.sign)
+
+    def RESTRICTS(self, other):
+        if other.IS_TRUE():
+            return True
+        if type(other) == SignedVar:
+            return self.EQ(other)
+        if type(other) == OrClause:
+            return any(sv.EQ(self) for sv in other.signed_vars)
+        return False
 
 
 class Clause(Expression):
@@ -107,6 +122,15 @@ class AndClause(Clause):
 
     def NOT(self):
         return OrClause.make(self.negated_names, self.names)
+
+    def RESTRICTS(self, other):
+        if other.IS_TRUE():
+            return True
+        if type(other) == SignedVar:
+            return any(sv.EQ(other) for sv in self.signed_vars)
+        if type(other) == AndClause:
+            return all(self.RESTRICTS(sv) for sv in other.signed_vars)
+        return False
 
     @staticmethod
     def make(names, negated_names):

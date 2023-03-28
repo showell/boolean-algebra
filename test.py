@@ -11,6 +11,24 @@ z = SYMBOL("z")
 
 
 @run_test
+def restriction():
+    assert not T.RESTRICTS(x)
+    assert not x.RESTRICTS(y)
+    assert not x.RESTRICTS(y & z)
+    assert not (y & x).RESTRICTS(z)
+    assert not x.RESTRICTS(~x)
+    assert not x.RESTRICTS(y | z)
+    assert not (x & y & z).RESTRICTS(w & x)
+
+    assert F.RESTRICTS(x)
+    assert F.RESTRICTS(x & y)
+    assert (x & y).RESTRICTS(x)
+    assert x.RESTRICTS(x)
+    assert x.RESTRICTS(x | y)
+    assert (x & y & z).RESTRICTS(x & y)
+
+
+@run_test
 def negated_vars():
     assert_str(~x, "~x")
 
