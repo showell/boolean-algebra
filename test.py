@@ -91,6 +91,9 @@ def double_negation():
     assert_str(~~~x, "~x")
     assert_str(~~~~~x, "~x")
 
+    assert_str(~~~~(x | y | z), "x|y|z")
+    assert_str(~~~~(x & y & z), "x&y&z")
+
 
 @run_test
 def de_morgan():
