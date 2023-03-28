@@ -4,7 +4,8 @@ from dispatcher import (
     dispatch_and,
     dispatch_or,
 )
- 
+
+
 class Expression:
     def __and__(self, other):
         return self.AND(other)
@@ -45,6 +46,9 @@ class SignedVar(Expression):
 
     def __str__(self):
         return self.name if self.sign else "~" + self.name
+
+    def EQ(self, other):
+        return self.name == other.name and self.sign == other.sign
 
     def NOT(self):
         return SignedVar(self.name, not self.sign)
@@ -110,17 +114,21 @@ def SYMBOL(name):
 def TrueVal_AND_Expression(_, x):
     return x
 
+
 @_AND(FalseVal, Expression)
 def FalseVal_AND_Expression(_, x):
     return FALSE
+
 
 @_OR(TrueVal, Expression)
 def TrueVal_OR_Expression(_, x):
     return TRUE
 
+
 @_OR(FalseVal, Expression)
 def FalseVal_OR_Expression(_, x):
     return x
+
 
 @_AND(SignedVar, SignedVar)
 def SignedVar_AND_SignedVar(x, y):
@@ -154,26 +162,24 @@ def OrClause_OR_OrClause(x, y):
     return OrClause.make(names, negated_names)
 
 
+def try_positive_absorb(clause, signed_var):
+    for sv in clause.signed_vars:
+        if sv.EQ(signed_var):
+            return signed_var
+
+
 @_OR(AndClause, SignedVar)
 def AndClause_OR_SignedVar(clause, signed_var):
-    for sv in clause.signed_vars:
-        if sv.name == signed_var.name:
-            if sv.sign == signed_var.sign:
-                return signed_var
-            else:
-                break
-    return None
+    expr = try_positive_absorb(clause, signed_var)
+    if expr is not None:
+        return expr
 
 
 @_AND(OrClause, SignedVar)
 def OrClause_AND_SignedVar(clause, signed_var):
-    for sv in clause.signed_vars:
-        if sv.name == signed_var.name:
-            if sv.sign == signed_var.sign:
-                return signed_var
-            else:
-                break
-    return None
+    expr = try_positive_absorb(clause, signed_var)
+    if expr is not None:
+        return expr
 
 
 @_OR(OrClause, SignedVar)
