@@ -126,6 +126,15 @@ def de_morgan():
 
 
 @run_test
+def advanced_de_morgan():
+    assert_str(x | (z & y), "(x|y)&(x|z)")
+    assert_str(~(x | (y & z)), "(~x&~y)|(~x&~z)")
+
+    assert_str(x & (z | y), "(x&y)|(x&z)")
+    assert_str(~(x & (z | y)), "(~x|~y)&(~x|~z)")
+
+
+@run_test
 def simple_or_clauses():
     assert_str(x | y, "x|y")
     assert_str(z | y | x, "x|y|z")

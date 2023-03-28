@@ -167,10 +167,16 @@ class Disjunction(Junction):
     def __str__(self):
         return "|".join(self.stringified_clauses())
 
+    def NOT(self):
+        return Conjunction([clause.NOT() for clause in self.clauses])
+
 
 class Conjunction(Junction):
     def __str__(self):
         return "&".join(self.stringified_clauses())
+
+    def NOT(self):
+        return Disjunction([clause.NOT() for clause in self.clauses])
 
 
 TRUE = TrueVal()
