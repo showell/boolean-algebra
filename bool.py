@@ -31,6 +31,9 @@ class Expression:
     def RESTRICTS(self, other):
         return False
 
+    def LOOSENS(self, other):
+        return other.RESTRICTS(self)
+
 
 class TrueVal(Expression):
     def __str__(self):
@@ -110,6 +113,15 @@ class OrClause(Clause):
     def NOT(self):
         return AndClause.make(self.negated_names, self.names)
 
+    def RESTRICTS(self, other):
+        if other.IS_TRUE():
+            return True
+        if type(other) == SignedVar:
+            return all(sv.EQ(other) for sv in self.signed_vars)
+        if type(other) == OrClause:
+            return all(sv.RESTRICTS(other) for sv in self.signed_vars)
+        return False
+
     @staticmethod
     def make(names, negated_names):
         signed_vars = Clause.make_signed_vars(names, negated_names)
@@ -145,16 +157,26 @@ FALSE = FalseVal()
 def SYMBOL(name):
     return SignedVar(name, True)
 
-def eliminate_resticting_terms(exprs):
+
+def eliminate_terms(exprs, predicate):
     reject_tups = set()
     for i in range(len(exprs)):
         for j in range(len(exprs)):
             if i != j and (j, i) not in reject_tups:
-                if exprs[i].RESTRICTS(exprs[j]):
+                if predicate(exprs[i], exprs[j]):
                     reject_tups.add((i, j))
 
     rejects = {i for i, j in reject_tups}
     return [exprs[i] for i in range(len(exprs)) if i not in rejects]
+
+
+def eliminate_resticting_terms(exprs):
+    return eliminate_terms(exprs, lambda x, y: x.RESTRICTS(y))
+
+
+def eliminate_loosening_terms(exprs):
+    return eliminate_terms(exprs, lambda x, y: x.LOOSENS(y))
+
 
 @_AND(TrueVal, Expression)
 def TrueVal_AND_Expression(_, x):
@@ -208,20 +230,10 @@ def OrClause_OR_OrClause(x, y):
     return OrClause.make(names, negated_names)
 
 
-def try_positive_absorb(clause, signed_var):
-    for sv in clause.signed_vars:
-        if sv.EQ(signed_var):
-            return signed_var
-
-
 @_OR(AndClause, SignedVar)
 def AndClause_OR_SignedVar(clause, signed_var):
-    expr = try_positive_absorb(clause, signed_var)
-    if expr is not None:
-        return expr
-
     exprs = [sv.OR(signed_var) for sv in clause.signed_vars]
-    exprs = [expr for expr in exprs if not expr.IS_TRUE()]
+    exprs = eliminate_loosening_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
 

@@ -19,13 +19,22 @@ def restriction():
     assert not x.RESTRICTS(~x)
     assert not x.RESTRICTS(y | z)
     assert not (x & y & z).RESTRICTS(w & x)
+    assert not (x | w).RESTRICTS(x | y | z)
 
+    assert F.RESTRICTS(T)
     assert F.RESTRICTS(x)
     assert F.RESTRICTS(x & y)
+    assert x.RESTRICTS(T)
     assert (x & y).RESTRICTS(x)
     assert x.RESTRICTS(x)
     assert x.RESTRICTS(x | y)
+    assert (x | y).RESTRICTS(x | y | z)
     assert (x & y & z).RESTRICTS(x & y)
+
+    assert T.LOOSENS(F)
+    assert T.LOOSENS(x)
+    assert T.LOOSENS(x | y)
+    assert (x | y).LOOSENS(x)
 
 
 @run_test
