@@ -267,22 +267,42 @@ def OrClause_OR_OrClause(x, y):
     return OrClause.make(names, negated_names)
 
 
-@_OR(AndClause, SignedVar)
-def AndClause_OR_SignedVar(clause, signed_var):
-    exprs = [sv.OR(signed_var) for sv in clause.signed_vars]
+def and_expression(exprs):
     exprs = eliminate_loosening_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
     return Conjunction(exprs)
 
 
-@_AND(OrClause, SignedVar)
-def OrClause_AND_SignedVar(clause, signed_var):
-    exprs = [sv.AND(signed_var) for sv in clause.signed_vars]
+@_OR(AndClause, SignedVar)
+def AndClause_OR_SignedVar(clause, signed_var):
+    exprs = [sv.OR(signed_var) for sv in clause.signed_vars]
+    return and_expression(exprs)
+
+
+@_OR(AndClause, AndClause)
+def AndClause_OR_AndClause(x, y):
+    exprs = [x.OR(sv) for sv in y.signed_vars]
+    return and_expression(exprs)
+
+
+def or_expression(exprs):
     exprs = eliminate_resticting_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
     return Disjunction(exprs)
+
+
+@_AND(OrClause, SignedVar)
+def OrClause_AND_SignedVar(clause, signed_var):
+    exprs = [sv.AND(signed_var) for sv in clause.signed_vars]
+    return or_expression(exprs)
+
+
+@_AND(OrClause, OrClause)
+def OrClause_AND_OrClause(x, y):
+    exprs = [x.AND(sv) for sv in y.signed_vars]
+    return or_expression(exprs)
 
 
 @_OR(OrClause, SignedVar)

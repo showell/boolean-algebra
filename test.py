@@ -101,6 +101,12 @@ def de_morgan():
     assert_str(~(x | y), "~x&~y")
 
 
+@run_test
+def elimination():
+    assert_str((x & y) | (x & ~y), "x")
+    assert_str((x | y) & (x | ~y), "x")
+
+
 # OTHER
 
 
