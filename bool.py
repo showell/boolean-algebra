@@ -163,9 +163,14 @@ class Junction(Expression):
         return [f"({clause})" for clause in clauses]
 
 
-class Conjunction(Junction):
+class Disjunction(Junction):
     def __str__(self):
         return "|".join(self.stringified_clauses())
+
+
+class Conjunction(Junction):
+    def __str__(self):
+        return "&".join(self.stringified_clauses())
 
 
 TRUE = TrueVal()
@@ -254,6 +259,7 @@ def AndClause_OR_SignedVar(clause, signed_var):
     exprs = eliminate_loosening_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
+    return Conjunction(exprs)
 
 
 @_AND(OrClause, SignedVar)
@@ -262,7 +268,7 @@ def OrClause_AND_SignedVar(clause, signed_var):
     exprs = eliminate_resticting_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
-    return Conjunction(exprs)
+    return Disjunction(exprs)
 
 
 @_OR(OrClause, SignedVar)
