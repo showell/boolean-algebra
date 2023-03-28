@@ -140,6 +140,17 @@ def restriction():
 
 
 @run_test
+def reductions():
+    assert_str((x & y) & (x & y & z), "x&y&z")
+    assert_str((x & y & z) & (x & y), "x&y&z")
+    assert_str((~w & x & y & z) & (x & y), "~w&x&y&z")
+
+    assert_str((x | y) | (x | y | z), "x|y|z")
+    assert_str((x | y | z) | (x | y), "x|y|z")
+    assert_str((~w | x | y | z) | (x | y), "~w|x|y|z")
+
+
+@run_test
 def advanced_de_morgan():
     assert_str(x | (z & y), "(x|y)&(x|z)")
     assert_str(~(x | (y & z)), "(~x&~y)|(~x&~z)")
@@ -174,6 +185,11 @@ def negated_or_clauses():
     assert_str((z | x) | ~x, "T")
     assert_str((~z | x) | (y | ~z), "x|y|~z")
     assert_str((x | z) | (x | ~z), "T")
+
+
+@run_test
+def negated_and():
+    assert_str((z & x) & ~x, "F")
 
 
 @run_test

@@ -17,9 +17,17 @@ class Expression:
         return self.NOT()
 
     def AND(self, other):
+        if self.RESTRICTS(other):
+            return self
+        if other.RESTRICTS(self):
+            return other
         return dispatch_and(self, other)
 
     def OR(self, other):
+        if self.LOOSENS(other):
+            return self
+        if other.LOOSENS(self):
+            return other
         return dispatch_or(self, other)
 
     def IS_TRUE(self):
