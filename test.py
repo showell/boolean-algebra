@@ -70,6 +70,11 @@ def commutativity():
 
 
 @run_test
+def distributivity():
+    assert_str(x & (z | y), "(x&y)|(x&z)")
+
+
+@run_test
 def identity():
     assert_str(x & T, "x")
     assert_str(x | F, "x")

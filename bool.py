@@ -99,6 +99,10 @@ class Clause(Expression):
         signed_vars = sorted(list(self.signed_vars), key=lambda sv: sv.name)
         return [str(sv) for sv in signed_vars]
 
+    def key(self):
+        var_names = {sv.name for sv in self.signed_vars}
+        return sorted(var_names)
+
     @staticmethod
     def make_signed_vars(names, negated_names):
         return [SignedVar(name, True) for name in names] + [
@@ -148,6 +152,20 @@ class AndClause(Clause):
     def make(names, negated_names):
         signed_vars = Clause.make_signed_vars(names, negated_names)
         return AndClause(signed_vars)
+
+
+class Junction(Expression):
+    def __init__(self, clauses):
+        self.clauses = clauses
+
+    def stringified_clauses(self):
+        clauses = sorted(self.clauses, key=lambda clause: clause.key())
+        return [f"({clause})" for clause in clauses]
+
+
+class Conjunction(Junction):
+    def __str__(self):
+        return "|".join(self.stringified_clauses())
 
 
 TRUE = TrueVal()
@@ -244,6 +262,7 @@ def OrClause_AND_SignedVar(clause, signed_var):
     exprs = eliminate_resticting_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
+    return Conjunction(exprs)
 
 
 @_OR(OrClause, SignedVar)
