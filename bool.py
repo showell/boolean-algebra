@@ -152,7 +152,14 @@ class OrClause(Clause):
             return False
         if type(other) == SignedVar:
             return all(sv.EQ(other) for sv in self.signed_vars)
-        return all(sv.RESTRICTS(other) for sv in self.signed_vars)
+        if type(other) == AndClause:
+            return all(self.RESTRICTS(sv) for sv in other.signed_vars)
+        if type(other) == OrClause:
+            return all(sv.RESTRICTS(other) for sv in self.signed_vars)
+        if type(other) == Disjunction:
+            return any(self.RESTRICTS(clause) for clause in other.clauses) 
+        if type(other) == Conjunction:
+            return all(self.RESTRICTS(clause) for clause in other.clauses) 
 
     def eval(self, tvars):
         return any(sv.eval(tvars) for sv in self.signed_vars)
@@ -179,7 +186,12 @@ class AndClause(Clause):
             return any(sv.EQ(other) for sv in self.signed_vars)
         if type(other) == AndClause:
             return all(self.RESTRICTS(sv) for sv in other.signed_vars)
-        return any(sv.RESTRICTS(other) for sv in self.signed_vars)
+        if type(other) == OrClause:
+            return any(sv.RESTRICTS(other) for sv in self.signed_vars)
+        if type(other) == Disjunction:
+            return any(self.RESTRICTS(clause) for clause in other.clauses) 
+        if type(other) == Conjunction:
+            return all(self.RESTRICTS(clause) for clause in other.clauses) 
 
     def eval(self, tvars):
         return all(sv.eval(tvars) for sv in self.signed_vars)
@@ -350,7 +362,7 @@ def AndClause_OR_SignedVar(clause, signed_var):
 
 @_OR(AndClause, AndClause)
 def AndClause_OR_AndClause(x, y):
-    exprs = [x.OR(sv) for sv in y.signed_vars]
+    exprs = [sv_x.OR(sv_y) for sv_x in x.signed_vars for sv_y in y.signed_vars]
     return and_expression(exprs)
 
 
@@ -362,7 +374,7 @@ def OrClause_AND_SignedVar(clause, signed_var):
 
 @_AND(OrClause, OrClause)
 def OrClause_AND_OrClause(x, y):
-    exprs = [x.AND(sv) for sv in y.signed_vars]
+    exprs = [sv_x.AND(sv_y) for sv_x in x.signed_vars for sv_y in y.signed_vars]
     return or_expression(exprs)
 
 
