@@ -34,6 +34,12 @@ class BoolWrapper:
     def __invert__(self):
         return BoolWrapper(~self.basic_expr, ~self.expr)
 
+    def check(self):
+        tvars = self.basic_expr.symbols()
+        basic_tt = truth_table(self.basic_expr, tvars)
+        tt = truth_table(self.expr, tvars)
+        assert basic_tt == tt
+
     def LOOSENS(self, other):
         return self.expr.LOOSENS(other.expr)
 

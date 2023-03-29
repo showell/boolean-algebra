@@ -53,6 +53,9 @@ class TrueVal(Expression):
     def IS_TRUE(self):
         return True
 
+    def eval(self, _):
+        return True
+
 
 class FalseVal(Expression):
     def __str__(self):
@@ -66,6 +69,9 @@ class FalseVal(Expression):
 
     def RESTRICTS(self, other):
         return True
+
+    def eval(self, _):
+        return False
 
 
 class SignedVar(Expression):
@@ -90,6 +96,13 @@ class SignedVar(Expression):
         if type(other) == OrClause:
             return any(sv.EQ(self) for sv in other.signed_vars)
         return False
+
+    def eval(self, tvars):
+        var_value = self.name in tvars
+        if self.sign:
+            return var_value
+        else:
+            return not var_value
 
 
 class Clause(Expression):
@@ -134,6 +147,9 @@ class OrClause(Clause):
             return all(sv.RESTRICTS(other) for sv in self.signed_vars)
         return False
 
+    def eval(self, tvars):
+        return any(sv.eval(tvars) for sv in self.signed_vars)
+
     @staticmethod
     def make(names, negated_names):
         signed_vars = Clause.make_signed_vars(names, negated_names)
@@ -155,6 +171,9 @@ class AndClause(Clause):
         if type(other) == AndClause:
             return all(self.RESTRICTS(sv) for sv in other.signed_vars)
         return False
+
+    def eval(self, tvars):
+        return all(sv.eval(tvars) for sv in self.signed_vars)
 
     @staticmethod
     def make(names, negated_names):
@@ -178,6 +197,9 @@ class Disjunction(Junction):
     def NOT(self):
         return Conjunction([clause.NOT() for clause in self.clauses])
 
+    def eval(self, tvars):
+        return any(clause.eval(tvars) for clause in self.clauses)
+
 
 class Conjunction(Junction):
     def __str__(self):
@@ -185,6 +207,9 @@ class Conjunction(Junction):
 
     def NOT(self):
         return Disjunction([clause.NOT() for clause in self.clauses])
+
+    def eval(self, tvars):
+        return all(clause.eval(tvars) for clause in self.clauses)
 
 
 TRUE = TrueVal()

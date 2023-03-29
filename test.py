@@ -14,6 +14,7 @@ z = bool_wrapper.SYMBOL("z")
 def check(expr, expected_str):
     if str(expr) != expected_str:
         raise AssertionError(f"got {expr} when expecting {expected_str}")
+    expr.check()
 
 
 @run_test
