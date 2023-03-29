@@ -207,6 +207,7 @@ class Disjunction(Junction):
 
 class Conjunction(Junction):
     def __init__(self, clauses):
+        assert all(type(clause) == OrClause for clause in clauses)
         self.clauses = clauses
 
     def __str__(self):
@@ -321,6 +322,7 @@ def OrClause_OR_OrClause(x, y):
 def AndClause_AND_OrClause(x, y):
     exprs = [x.AND(sv) for sv in y.signed_vars]
     return or_expression(exprs)
+
 
 @_OR(AndClause, OrClause)
 def AndClause_OR_OrClause(x, y):
