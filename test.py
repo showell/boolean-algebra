@@ -215,3 +215,8 @@ def simple_and_clauses():
     check((z & x) & (y & ~w), "~w&x&y&z")
     check((z & x) & (y & ~w) & T, "~w&x&y&z")
     check((z & x) & (y & ~w) & F, "F")
+
+
+@run_test
+def tricky():
+    check((x & y) & (~x | ~y), "F")

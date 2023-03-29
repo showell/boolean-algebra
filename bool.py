@@ -306,6 +306,12 @@ def OrClause_OR_OrClause(x, y):
     return OrClause.make(names, negated_names)
 
 
+@_AND(AndClause, OrClause)
+def AndClause_AND_OrClause(x, y):
+    exprs = [x.AND(sv) for sv in y.signed_vars]
+    return or_expression(exprs)
+
+
 @_OR(AndClause, SignedVar)
 def AndClause_OR_SignedVar(clause, signed_var):
     exprs = [sv.OR(signed_var) for sv in clause.signed_vars]

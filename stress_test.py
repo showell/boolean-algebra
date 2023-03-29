@@ -9,7 +9,7 @@ x = SYMBOL("x")
 y = SYMBOL("y")
 
 
-# @run_test
+@run_test
 def stress():
     exprs = [T, F, x, y]
 
