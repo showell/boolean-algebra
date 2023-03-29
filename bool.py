@@ -36,9 +36,6 @@ class Expression:
     def IS_FALSE(self):
         return False
 
-    def RESTRICTS(self, other):
-        return False
-
     def LOOSENS(self, other):
         return other.RESTRICTS(self)
 
@@ -94,11 +91,19 @@ class SignedVar(Expression):
     def RESTRICTS(self, other):
         if other.IS_TRUE():
             return True
+        if other.IS_FALSE():
+            return False
         if type(other) == SignedVar:
             return self.EQ(other)
         if type(other) == OrClause:
             return any(sv.EQ(self) for sv in other.signed_vars)
-        return False
+        if type(other) == AndClause:
+            return all(sv.EQ(self) for sv in other.signed_vars)
+        if type(other) == Disjunction:
+            return any(self.RESTRICTS(clause) for clause in other.clauses) 
+        if type(other) == Conjunction:
+            return all(self.RESTRICTS(clause) for clause in other.clauses) 
+        assert False
 
     def eval(self, tvars):
         var_value = self.name in tvars
@@ -146,9 +151,7 @@ class OrClause(Clause):
             return True
         if type(other) == SignedVar:
             return all(sv.EQ(other) for sv in self.signed_vars)
-        if type(other) == OrClause:
-            return all(sv.RESTRICTS(other) for sv in self.signed_vars)
-        return False
+        return all(sv.RESTRICTS(other) for sv in self.signed_vars)
 
     def eval(self, tvars):
         return any(sv.eval(tvars) for sv in self.signed_vars)
@@ -173,7 +176,7 @@ class AndClause(Clause):
             return any(sv.EQ(other) for sv in self.signed_vars)
         if type(other) == AndClause:
             return all(self.RESTRICTS(sv) for sv in other.signed_vars)
-        return False
+        return any(sv.RESTRICTS(other) for sv in self.signed_vars)
 
     def eval(self, tvars):
         return all(sv.eval(tvars) for sv in self.signed_vars)
@@ -201,6 +204,12 @@ class Disjunction(Junction):
     def NOT(self):
         return Conjunction([clause.NOT() for clause in self.clauses])
 
+    def RESTRICTS(self, other):
+        print("---")
+        for clause in self.clauses:
+            print(clause, other, clause.RESTRICTS(other))
+        return all(clause.RESTRICTS(other) for clause in self.clauses)
+
     def eval(self, tvars):
         return any(clause.eval(tvars) for clause in self.clauses)
 
@@ -215,6 +224,9 @@ class Conjunction(Junction):
 
     def NOT(self):
         return Disjunction([clause.NOT() for clause in self.clauses])
+
+    def RESTRICTS(self, other):
+        return any(clause.RESTRICTS(other) for clause in self.clauses)
 
     def eval(self, tvars):
         return all(clause.eval(tvars) for clause in self.clauses)

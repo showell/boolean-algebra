@@ -15,6 +15,7 @@ def check(expr, expected_str):
     if str(expr) != expected_str:
         raise AssertionError(f"got {expr} when expecting {expected_str}")
     expr.check()
+    # assert expr.RESTRICTS(expr)
 
 
 @run_test
