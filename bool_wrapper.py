@@ -1,6 +1,6 @@
 import basic_bool
 import bool
-from truth_table import solutions
+from solver import solutions
 
 
 class BoolWrapper:

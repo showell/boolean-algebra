@@ -1,6 +1,6 @@
 from basic_bool import TRUE, FALSE, SYMBOL
 from lib.test_helpers import assert_equal, assert_str, run_test
-from truth_table import stringify_solutions, solutions
+from solver import stringify_solutions, solutions
 
 T = TRUE
 F = FALSE
@@ -59,6 +59,14 @@ def eval():
     assert (x | ~y).eval(X)
     assert not (x | ~y).eval(Y)
     assert (x | ~y).eval(BOTH)
+
+
+@run_test
+def show_solution_output():
+    assert_equal(
+        solutions(x | y, {"x", "y", "z"}),
+        "{x}{x,y}{x,y,z}{x,z}{y}{y,z}",
+    )
 
 
 @run_test
