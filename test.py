@@ -1,7 +1,7 @@
 import basic_bool
 import bool
 from lib.test_helpers import run_test
-from truth_table import listify_truth_table, truth_table
+from truth_table import truth_table
 
 
 class BoolWrapper:

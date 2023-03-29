@@ -66,7 +66,7 @@ def truth_tables():
     def assert_TT(tvar_sets, expr):
         expected_result = listify_truth_table(tvar_sets)
         variables = {"x", "y"}
-        tt = listify_truth_table(truth_table(expr, variables))
+        tt = truth_table(expr, variables)
         assert_equal(expected_result, tt)
 
     N = NEITHER
