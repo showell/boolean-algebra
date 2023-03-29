@@ -221,3 +221,4 @@ def simple_and_clauses():
 def tricky():
     check((x & y) & (~x | ~y), "F")
     check((x & y) | (x | y), "x|y")
+    check(x & ((x) & (y)) | (~(x) | (y)), "~x|y")

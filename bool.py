@@ -362,3 +362,25 @@ def OrClause_OR_SignedVar(clause, signed_var):
 @_AND(AndClause, SignedVar)
 def AndClause_AND_SignedVar(clause, signed_var):
     return AndClause_AND_AndClause(clause, AndClause([signed_var]))
+
+
+@_AND(Disjunction, SignedVar)
+def Disjunction_AND_SignedVar(conjunction, signed_var):
+    exprs = [clause.AND(signed_var) for clause in conjunction.clauses]
+    return or_expression(exprs)
+
+
+@_OR(Disjunction, SignedVar)
+def Disjunction_OR_SignedVar(conjunction, signed_var):
+    return or_expression(conjunction.clauses + [AndClause([signed_var])])
+
+
+@_AND(Conjunction, SignedVar)
+def Conjunction_AND_SignedVar(conjunction, signed_var):
+    return and_expression(conjunction.clauses + [OrClause([signed_var])])
+
+
+@_OR(Conjunction, SignedVar)
+def Conjunction_OR_SignedVar(conjunction, signed_var):
+    exprs = [clause.OR(signed_var) for clause in conjunction.clauses]
+    return and_expression(exprs)
