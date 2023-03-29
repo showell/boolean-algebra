@@ -16,7 +16,7 @@ and then you can build up larger expressions using code like
 
 Then the objects themselves allow the following:
 
-<code>
+<pre>
     x = SYMBOL("x")
     y = SYMBOL("y")
 
@@ -25,7 +25,7 @@ Then the objects themselves allow the following:
     (x | y).eval({"x", "y")) == True
     (~x).eval({"x")) == False
     (y).eval({"x")) == False
-</code>
+</pre>
 
 The code is very reliable due to its simplicity, and you can read
 [test_basic.py](./test_basic.py) to see its basic operation.
