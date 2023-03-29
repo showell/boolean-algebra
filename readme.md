@@ -10,8 +10,22 @@ The [basic_bool.py](./basic_bool.py) module is a finished product
 that allows you to Pythonically build an [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree)
 for a boolean expression.  It is less than 100 lines of code.
 
-Its API is basically TRUE, FALSE, and SYMBOL, and then you can build
-up larger expressions using code like `x & y`, `a | b`, and `~z`.
+Its construction API is basically `TRUE`, `FALSE`, and `SYMBOL`,
+and then you can build up larger expressions using code like
+`x & y`, `a | b`, and `~z`.
+
+Then the objects themselves allow the following:
+
+<pre>
+    x = SYMBOL("x")
+    y = SYMBOL("y")
+
+    str(~y | x) == "(~y)|(x)"
+    (~y | x).symbols() == {"x", "y"}
+    (x | y).eval({"x", "y")) == True
+    (~x).eval({"x")) == False
+    (y).eval({"x")) == False
+</code>
 
 The code is very reliable due to its simplicity, and you can read
 [test_basic.py](./test_basic.py) to see its basic operation.

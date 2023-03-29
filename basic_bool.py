@@ -35,6 +35,9 @@ class Negated(Expression):
     def __str__(self):
         return "~" + str(self.x)
 
+    def symbols(self):
+        return self.x.symbols()
+
     def eval(self, tvars):
         return not self.x.eval(tvars)
 

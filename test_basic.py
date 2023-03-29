@@ -22,6 +22,12 @@ def strings():
     assert_str(T | x, "(T)|(x)")
     assert_str(~y | x, "(~y)|(x)")
 
+@run_test
+def symbols():
+    assert_equal(
+        (~y | x).symbols(),
+        {"x", "y"},
+    )
 
 @run_test
 def eval():
