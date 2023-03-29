@@ -16,7 +16,7 @@ and then you can build up larger expressions using code like
 
 Then the objects themselves allow the following:
 
-<pre>
+<code>
     x = SYMBOL("x")
     y = SYMBOL("y")
 
