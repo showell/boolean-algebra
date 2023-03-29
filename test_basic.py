@@ -94,7 +94,7 @@ def solve():
     check([FF, TF], ~y)
     check([TF, TT], x)
     check([FT, TT], y)
-    check([TF, FT], (x | y) & ~(x & y))
+    check([TF, FT], (x | y) & (~x | ~y))
     check([FF, TT], (~x & ~y) | (x & y))
     check([FF, FT, TT], ~x | y)
     check([FF, TF, FT], ~x | ~y)
