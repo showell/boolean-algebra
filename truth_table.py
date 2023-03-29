@@ -11,9 +11,9 @@ def braced(s):
     return "{" + s + "}"
 
 
-def stringify_truth_table(truth_table):
-    return "".join(sorted(braced(",".join(sorted(s))) for s in truth_table))
+def stringify_solutions(solutions):
+    return "".join(sorted(braced(",".join(sorted(s))) for s in solutions))
 
 
-def truth_table(expr, variables):
-    return stringify_truth_table(s for s in powerset(variables) if expr.eval(s))
+def solutions(expr, variables):
+    return stringify_solutions(s for s in powerset(variables) if expr.eval(s))

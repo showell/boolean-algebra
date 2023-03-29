@@ -1,6 +1,6 @@
 import basic_bool
 import bool
-from truth_table import truth_table
+from truth_table import solutions
 
 
 class BoolWrapper:
@@ -36,9 +36,9 @@ class BoolWrapper:
 
     def check(self):
         tvars = self.basic_expr.symbols()
-        basic_tt = truth_table(self.basic_expr, tvars)
-        tt = truth_table(self.expr, tvars)
-        assert basic_tt == tt
+        basic_solutions = solutions(self.basic_expr, tvars)
+        expr_solutions = solutions(self.expr, tvars)
+        assert expr_solutions == basic_solutions
 
     def LOOSENS(self, other):
         return self.expr.LOOSENS(other.expr)

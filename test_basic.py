@@ -1,6 +1,6 @@
 from basic_bool import TRUE, FALSE, SYMBOL
 from lib.test_helpers import assert_equal, assert_str, run_test
-from truth_table import stringify_truth_table, truth_table
+from truth_table import stringify_solutions, solutions
 
 T = TRUE
 F = FALSE
@@ -62,29 +62,29 @@ def eval():
 
 
 @run_test
-def truth_tables():
-    def assert_TT(tvar_sets, expr):
-        expected_result = stringify_truth_table(tvar_sets)
+def solve():
+    def check(tvar_sets, expr):
+        expected_result = stringify_solutions(tvar_sets)
         variables = {"x", "y"}
-        tt = truth_table(expr, variables)
+        tt = solutions(expr, variables)
         assert_equal(expected_result, tt)
 
     N = NEITHER
     B = BOTH
 
-    assert_TT([], F)
-    assert_TT([N], ~(x | y))
-    assert_TT([X], x & ~y)
-    assert_TT([Y], ~x & y)
-    assert_TT([B], x & y)
-    assert_TT([N, X], ~y)
-    assert_TT([N, Y], ~x)
-    assert_TT([N, B], (~x & ~y) | (x & y))
-    assert_TT([X, Y], (x | y) & ~(x & y))
-    assert_TT([X, B], x)
-    assert_TT([Y, B], y)
-    assert_TT([N, X, Y], ~x | ~y)
-    assert_TT([N, X, B], x | ~y)
-    assert_TT([N, Y, B], ~x | y)
-    assert_TT([X, Y, B], x | y)
-    assert_TT([N, X, Y, B], T)
+    check([], F)
+    check([N], ~(x | y))
+    check([X], x & ~y)
+    check([Y], ~x & y)
+    check([B], x & y)
+    check([N, X], ~y)
+    check([N, Y], ~x)
+    check([N, B], (~x & ~y) | (x & y))
+    check([X, Y], (x | y) & ~(x & y))
+    check([X, B], x)
+    check([Y, B], y)
+    check([N, X, Y], ~x | ~y)
+    check([N, X, B], x | ~y)
+    check([N, Y, B], ~x | y)
+    check([X, Y, B], x | y)
+    check([N, X, Y, B], T)
