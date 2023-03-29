@@ -8,10 +8,10 @@ F = FALSE
 x = SYMBOL("x")
 y = SYMBOL("y")
 
-NEITHER = set()
-X = {"x"}
-Y = {"y"}
-BOTH = {"x", "y"}
+FF = set()
+TF = {"x"}
+FT = {"y"}
+TT = {"x", "y"}
 
 
 @run_test
@@ -22,6 +22,7 @@ def strings():
     assert_str(T | x, "(T)|(x)")
     assert_str(~y | x, "(~y)|(x)")
 
+
 @run_test
 def symbols():
     assert_equal(
@@ -29,42 +30,43 @@ def symbols():
         {"x", "y"},
     )
 
+
 @run_test
 def eval():
-    assert not F.eval(NEITHER)
-    assert not F.eval(X)
-    assert not F.eval(Y)
-    assert not F.eval(BOTH)
+    assert not F.eval(FF)
+    assert not F.eval(TF)
+    assert not F.eval(FT)
+    assert not F.eval(TT)
 
-    assert T.eval(NEITHER)
-    assert T.eval(X)
-    assert T.eval(Y)
-    assert T.eval(BOTH)
+    assert T.eval(FF)
+    assert T.eval(TF)
+    assert T.eval(FT)
+    assert T.eval(TT)
 
-    assert not x.eval(NEITHER)
-    assert x.eval(X)
-    assert not x.eval(Y)
-    assert x.eval(BOTH)
+    assert not x.eval(FF)
+    assert x.eval(TF)
+    assert not x.eval(FT)
+    assert x.eval(TT)
 
-    assert (~x).eval(NEITHER)
-    assert not (~x).eval(X)
-    assert (~x).eval(Y)
-    assert not (~x).eval(BOTH)
+    assert (~x).eval(FF)
+    assert not (~x).eval(TF)
+    assert (~x).eval(FT)
+    assert not (~x).eval(TT)
 
-    assert not (x & y).eval(NEITHER)
-    assert not (x & y).eval(X)
-    assert not (x & y).eval(Y)
-    assert (x & y).eval(BOTH)
+    assert not (x & y).eval(FF)
+    assert not (x & y).eval(TF)
+    assert not (x & y).eval(FT)
+    assert (x & y).eval(TT)
 
-    assert not (x | y).eval(NEITHER)
-    assert (x | y).eval(X)
-    assert (x | y).eval(Y)
-    assert (x | y).eval(BOTH)
+    assert not (x | y).eval(FF)
+    assert (x | y).eval(TF)
+    assert (x | y).eval(FT)
+    assert (x | y).eval(TT)
 
-    assert (x | ~y).eval(NEITHER)
-    assert (x | ~y).eval(X)
-    assert not (x | ~y).eval(Y)
-    assert (x | ~y).eval(BOTH)
+    assert (x | ~y).eval(FF)
+    assert (x | ~y).eval(TF)
+    assert not (x | ~y).eval(FT)
+    assert (x | ~y).eval(TT)
 
 
 @run_test
@@ -83,22 +85,19 @@ def solve():
         tt = solutions(expr, variables)
         assert_equal(expected_result, tt)
 
-    N = NEITHER
-    B = BOTH
-
     check([], F)
-    check([N], ~(x | y))
-    check([X], x & ~y)
-    check([Y], ~x & y)
-    check([B], x & y)
-    check([N, X], ~y)
-    check([N, Y], ~x)
-    check([N, B], (~x & ~y) | (x & y))
-    check([X, Y], (x | y) & ~(x & y))
-    check([X, B], x)
-    check([Y, B], y)
-    check([N, X, Y], ~x | ~y)
-    check([N, X, B], x | ~y)
-    check([N, Y, B], ~x | y)
-    check([X, Y, B], x | y)
-    check([N, X, Y, B], T)
+    check([FF], ~(x | y))
+    check([FT], ~x & y)
+    check([TF], x & ~y)
+    check([TT], x & y)
+    check([FF, FT], ~x)
+    check([FF, TF], ~y)
+    check([TF, TT], x)
+    check([FT, TT], y)
+    check([TF, FT], (x | y) & ~(x & y))
+    check([FF, TT], (~x & ~y) | (x & y))
+    check([FF, FT, TT], ~x | y)
+    check([FF, TF, FT], ~x | ~y)
+    check([FF, TF, TT], x | ~y)
+    check([TF, FT, TT], x | y)
+    check([FF, TF, FT, TT], T)
