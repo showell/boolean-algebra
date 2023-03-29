@@ -1,6 +1,6 @@
 from basic_bool import TRUE, FALSE, SYMBOL
 from lib.test_helpers import assert_equal, assert_str, run_test
-from truth_table import listify_truth_table, truth_table
+from truth_table import stringify_truth_table, truth_table
 
 T = TRUE
 F = FALSE
@@ -64,7 +64,7 @@ def eval():
 @run_test
 def truth_tables():
     def assert_TT(tvar_sets, expr):
-        expected_result = listify_truth_table(tvar_sets)
+        expected_result = stringify_truth_table(tvar_sets)
         variables = {"x", "y"}
         tt = truth_table(expr, variables)
         assert_equal(expected_result, tt)

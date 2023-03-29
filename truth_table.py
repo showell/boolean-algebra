@@ -7,13 +7,13 @@ def powerset(iterable):
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
-def paren(s):
-    return "(" + s + ")"
+def braced(s):
+    return "{" + s + "}"
 
 
-def listify_truth_table(truth_table):
-    return "".join(sorted(paren(",".join(sorted(s))) for s in truth_table))
+def stringify_truth_table(truth_table):
+    return "".join(sorted(braced(",".join(sorted(s))) for s in truth_table))
 
 
 def truth_table(expr, variables):
-    return listify_truth_table(s for s in powerset(variables) if expr.eval(s))
+    return stringify_truth_table(s for s in powerset(variables) if expr.eval(s))
