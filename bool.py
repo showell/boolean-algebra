@@ -39,7 +39,6 @@ class Expression:
     def LOOSENS(self, other):
         return other.RESTRICTS(self)
 
-
 class TrueVal(Expression):
     def __str__(self):
         return "T"
@@ -149,6 +148,8 @@ class OrClause(Clause):
     def RESTRICTS(self, other):
         if other.IS_TRUE():
             return True
+        if other.IS_FALSE():
+            return False
         if type(other) == SignedVar:
             return all(sv.EQ(other) for sv in self.signed_vars)
         return all(sv.RESTRICTS(other) for sv in self.signed_vars)
@@ -172,6 +173,8 @@ class AndClause(Clause):
     def RESTRICTS(self, other):
         if other.IS_TRUE():
             return True
+        if other.IS_FALSE():
+            return False
         if type(other) == SignedVar:
             return any(sv.EQ(other) for sv in self.signed_vars)
         if type(other) == AndClause:
@@ -205,9 +208,6 @@ class Disjunction(Junction):
         return Conjunction([clause.NOT() for clause in self.clauses])
 
     def RESTRICTS(self, other):
-        print("---")
-        for clause in self.clauses:
-            print(clause, other, clause.RESTRICTS(other))
         return all(clause.RESTRICTS(other) for clause in self.clauses)
 
     def eval(self, tvars):
