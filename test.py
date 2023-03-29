@@ -1,6 +1,6 @@
 import basic_bool
 import bool
-from lib.test_helpers import run_test, assert_str
+from lib.test_helpers import run_test
 from truth_table import listify_truth_table, truth_table
 
 
@@ -47,101 +47,106 @@ y = BoolWrapper.SYMBOL("y")
 z = BoolWrapper.SYMBOL("z")
 
 
+def check(expr, expected_str):
+    if str(expr) != expected_str:
+        raise AssertionError(f"got {expr} when expecting {expected_str}")
+
+
 @run_test
 def associativity():
-    assert_str(x & (y & z), "x&y&z")
-    assert_str(x | (y | z), "x|y|z")
+    check(x & (y & z), "x&y&z")
+    check(x | (y | z), "x|y|z")
 
-    assert_str(x & (z & y), "x&y&z")
-    assert_str(x | (z | y), "x|y|z")
+    check(x & (z & y), "x&y&z")
+    check(x | (z | y), "x|y|z")
 
-    assert_str((x & z) & y, "x&y&z")
-    assert_str((x | z) | y, "x|y|z")
+    check((x & z) & y, "x&y&z")
+    check((x | z) | y, "x|y|z")
 
 
 @run_test
 def commutativity():
-    assert_str(y & x, "x&y")
-    assert_str(x & y, "x&y")
-    assert_str(z & x & y, "x&y&z")
+    check(y & x, "x&y")
+    check(x & y, "x&y")
+    check(z & x & y, "x&y&z")
 
-    assert_str(y | x, "x|y")
-    assert_str(x | y, "x|y")
-    assert_str(z | x | y, "x|y|z")
+    check(y | x, "x|y")
+    check(x | y, "x|y")
+    check(z | x | y, "x|y|z")
 
 
 @run_test
 def distributivity():
-    assert_str(x & (z | y), "(x&y)|(x&z)")
-    assert_str(x | (z & y), "(x|y)&(x|z)")
+    check(x & (z | y), "(x&y)|(x&z)")
+    check(x | (z & y), "(x|y)&(x|z)")
 
 
 @run_test
 def identity():
-    assert_str(x & T, "x")
-    assert_str(x | F, "x")
+    check(x & T, "x")
+    check(x | F, "x")
 
 
 @run_test
 def annihilator():
-    assert_str(x & F, "F")
-    assert_str(x | T, "T")
+    check(x & F, "F")
+    check(x | T, "T")
 
 
 @run_test
 def idemptotence():
-    assert_str(x & x, "x")
-    assert_str(x | x, "x")
+    check(x & x, "x")
+    check(x | x, "x")
 
 
 @run_test
 def absorption():
-    assert_str((x | y) & x, "x")
-    assert_str(x & (x | y), "x")
-    assert_str(x | (x & y), "x")
-    assert_str((x & y) | x, "x")
+    check((x | y) & x, "x")
+    check(x & (x | y), "x")
+    check(x | (x & y), "x")
+    check((x & y) | x, "x")
 
 
 @run_test
 def negative_absorption():
-    assert_str(x & (~x | y), "x&y")
-    assert_str((~x | y) & x, "x&y")
+    check(x & (~x | y), "x&y")
+    check((~x | y) & x, "x&y")
 
-    assert_str(x | (~x & y), "x|y")
-    assert_str((~x & y) | x, "x|y")
+    check(x | (~x & y), "x|y")
+    check((~x & y) | x, "x|y")
 
 
 @run_test
 def complementation():
-    assert_str(x & ~x, "F")
-    assert_str(x | ~x, "T")
+    check(x & ~x, "F")
+    check(x | ~x, "T")
 
-    assert_str(~x & x, "F")
-    assert_str(~x | x, "T")
+    check(~x & x, "F")
+    check(~x | x, "T")
 
 
 @run_test
 def double_negation():
-    assert_str(~~x, "x")
-    assert_str(~~~~x, "x")
+    check(~~x, "x")
+    check(~~~~x, "x")
 
-    assert_str(~~~x, "~x")
-    assert_str(~~~~~x, "~x")
+    check(~~~x, "~x")
+    check(~~~~~x, "~x")
 
-    assert_str(~~~~(x | y | z), "x|y|z")
-    assert_str(~~~~(x & y & z), "x&y&z")
+    check(~~~~(x | y | z), "x|y|z")
+    check(~~~~(x & y & z), "x&y&z")
 
 
 @run_test
 def de_morgan():
-    assert_str(~(x & y), "~x|~y")
-    assert_str(~(x | y), "~x&~y")
+    check(~(x & y), "~x|~y")
+    check(~(x | y), "~x&~y")
 
 
 @run_test
 def elimination():
-    assert_str((x & y) | (x & ~y), "x")
-    assert_str((x | y) & (x | ~y), "x")
+    check((x & y) | (x & ~y), "x")
+    check((x | y) & (x | ~y), "x")
 
 
 # OTHER
@@ -149,10 +154,10 @@ def elimination():
 
 @run_test
 def negated_vars():
-    assert_str(~x, "~x")
+    check(~x, "~x")
 
-    assert_str(~x & ~x, "~x")
-    assert_str(~x | ~x, "~x")
+    check(~x & ~x, "~x")
+    check(~x | ~x, "~x")
 
 
 @run_test
@@ -184,64 +189,64 @@ def restriction():
 
 @run_test
 def reductions():
-    assert_str((x & y) & (x & y & z), "x&y&z")
-    assert_str((x & y & z) & (x & y), "x&y&z")
-    assert_str((~w & x & y & z) & (x & y), "~w&x&y&z")
+    check((x & y) & (x & y & z), "x&y&z")
+    check((x & y & z) & (x & y), "x&y&z")
+    check((~w & x & y & z) & (x & y), "~w&x&y&z")
 
-    assert_str((x | y) | (x | y | z), "x|y|z")
-    assert_str((x | y | z) | (x | y), "x|y|z")
-    assert_str((~w | x | y | z) | (x | y), "~w|x|y|z")
+    check((x | y) | (x | y | z), "x|y|z")
+    check((x | y | z) | (x | y), "x|y|z")
+    check((~w | x | y | z) | (x | y), "~w|x|y|z")
 
 
 @run_test
 def advanced_de_morgan():
-    assert_str(x | (z & y), "(x|y)&(x|z)")
-    assert_str(~(x | (y & z)), "(~x&~y)|(~x&~z)")
+    check(x | (z & y), "(x|y)&(x|z)")
+    check(~(x | (y & z)), "(~x&~y)|(~x&~z)")
 
-    assert_str(x & (z | y), "(x&y)|(x&z)")
-    assert_str(~(x & (z | y)), "(~x|~y)&(~x|~z)")
+    check(x & (z | y), "(x&y)|(x&z)")
+    check(~(x & (z | y)), "(~x|~y)&(~x|~z)")
 
 
 @run_test
 def simple_or_clauses():
-    assert_str(x | y, "x|y")
-    assert_str(z | y | x, "x|y|z")
+    check(x | y, "x|y")
+    check(z | y | x, "x|y|z")
 
 
 @run_test
 def negated_or_clauses():
-    assert_str(x | ~y, "x|~y")
-    assert_str(~y | x, "x|~y")
+    check(x | ~y, "x|~y")
+    check(~y | x, "x|~y")
 
-    assert_str(z | x | ~y, "x|~y|z")
-    assert_str(z | ~y | x, "x|~y|z")
+    check(z | x | ~y, "x|~y|z")
+    check(z | ~y | x, "x|~y|z")
 
-    assert_str(z | x | ~y | w, "w|x|~y|z")
-    assert_str(z | x | ~y | ~w, "~w|x|~y|z")
+    check(z | x | ~y | w, "w|x|~y|z")
+    check(z | x | ~y | ~w, "~w|x|~y|z")
 
-    assert_str(z | x | ~y | w | z, "w|x|~y|z")
-    assert_str(z | x | ~y | ~w | z, "~w|x|~y|z")
+    check(z | x | ~y | w | z, "w|x|~y|z")
+    check(z | x | ~y | ~w | z, "~w|x|~y|z")
 
-    assert_str((z | x) | (~y | w | z), "w|x|~y|z")
-    assert_str((z | x) | (~y | ~w | z), "~w|x|~y|z")
+    check((z | x) | (~y | w | z), "w|x|~y|z")
+    check((z | x) | (~y | ~w | z), "~w|x|~y|z")
 
-    assert_str((z | x) | ~x, "T")
-    assert_str((~z | x) | (y | ~z), "x|y|~z")
-    assert_str((x | z) | (x | ~z), "T")
+    check((z | x) | ~x, "T")
+    check((~z | x) | (y | ~z), "x|y|~z")
+    check((x | z) | (x | ~z), "T")
 
 
 @run_test
 def negated_and():
-    assert_str((z & x) & ~x, "F")
+    check((z & x) & ~x, "F")
 
 
 @run_test
 def simple_and_clauses():
-    assert_str(x & y, "x&y")
-    assert_str(x & y & z, "x&y&z")
-    assert_str(z & x & y, "x&y&z")
-    assert_str((z & x) & y, "x&y&z")
-    assert_str((z & x) & (y & w), "w&x&y&z")
-    assert_str((z & x) & (y & ~w), "~w&x&y&z")
-    assert_str((z & x) & (y & ~w) & T, "~w&x&y&z")
-    assert_str((z & x) & (y & ~w) & F, "F")
+    check(x & y, "x&y")
+    check(x & y & z, "x&y&z")
+    check(z & x & y, "x&y&z")
+    check((z & x) & y, "x&y&z")
+    check((z & x) & (y & w), "w&x&y&z")
+    check((z & x) & (y & ~w), "~w&x&y&z")
+    check((z & x) & (y & ~w) & T, "~w&x&y&z")
+    check((z & x) & (y & ~w) & F, "F")
