@@ -1,5 +1,6 @@
 from basic_bool import TRUE, FALSE, SYMBOL
-from lib.test_helpers import run_test, assert_str
+from lib.test_helpers import assert_equal, assert_str, run_test
+from truth_table import listify_truth_table, truth_table
 
 T = TRUE
 F = FALSE
@@ -58,3 +59,32 @@ def eval():
     assert (x | ~y).eval(X)
     assert not (x | ~y).eval(Y)
     assert (x | ~y).eval(BOTH)
+
+
+@run_test
+def truth_tables():
+    def assert_TT(tvar_sets, expr):
+        expected_result = listify_truth_table(tvar_sets)
+        variables = {"x", "y"}
+        tt = listify_truth_table(truth_table(expr, variables))
+        assert_equal(expected_result, tt)
+
+    N = NEITHER
+    B = BOTH
+
+    assert_TT([], F)
+    assert_TT([N], ~(x | y))
+    assert_TT([X], x & ~y)
+    assert_TT([Y], ~x & y)
+    assert_TT([B], x & y)
+    assert_TT([N, X], ~y)
+    assert_TT([N, Y], ~x)
+    assert_TT([N, B], (~x & ~y) | (x & y))
+    assert_TT([X, Y], (x | y) & ~(x & y))
+    assert_TT([X, B], x)
+    assert_TT([Y, B], y)
+    assert_TT([N, X, Y], ~x | ~y)
+    assert_TT([N, X, B], x | ~y)
+    assert_TT([N, Y, B], ~x | y)
+    assert_TT([X, Y, B], x | y)
+    assert_TT([N, X, Y, B], T)
