@@ -25,8 +25,8 @@ def stress():
         next_exprs = []
 
         for expr in exprs:
-            v = ~expr
-            handle(v)
+            handle(~expr)
+            handle(~~expr)
 
         for a in exprs:
             for b in exprs:

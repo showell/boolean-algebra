@@ -53,6 +53,9 @@ class TrueVal(Expression):
     def IS_TRUE(self):
         return True
 
+    def RESTRICTS(self, other):
+        return other.IS_TRUE()
+
     def eval(self, _):
         return True
 
@@ -182,15 +185,16 @@ class AndClause(Clause):
 
 
 class Junction(Expression):
-    def __init__(self, clauses):
-        self.clauses = clauses
-
     def stringified_clauses(self):
         clauses = sorted(self.clauses, key=lambda clause: clause.key())
         return [f"({clause})" for clause in clauses]
 
 
 class Disjunction(Junction):
+    def __init__(self, clauses):
+        assert all(type(clause) == AndClause for clause in clauses)
+        self.clauses = clauses
+
     def __str__(self):
         return "|".join(self.stringified_clauses())
 
@@ -202,6 +206,9 @@ class Disjunction(Junction):
 
 
 class Conjunction(Junction):
+    def __init__(self, clauses):
+        self.clauses = clauses
+
     def __str__(self):
         return "&".join(self.stringified_clauses())
 
@@ -244,6 +251,8 @@ def and_expression(exprs):
     exprs = eliminate_loosening_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
+    if all(type(expr) == SignedVar for expr in exprs):
+        return AndClause(exprs)
     return Conjunction(exprs)
 
 
@@ -251,6 +260,8 @@ def or_expression(exprs):
     exprs = eliminate_resticting_terms(exprs)
     if len(exprs) == 1:
         return exprs[0]
+    if all(type(expr) == SignedVar for expr in exprs):
+        return OrClause(exprs)
     return Disjunction(exprs)
 
 
@@ -310,6 +321,11 @@ def OrClause_OR_OrClause(x, y):
 def AndClause_AND_OrClause(x, y):
     exprs = [x.AND(sv) for sv in y.signed_vars]
     return or_expression(exprs)
+
+@_OR(AndClause, OrClause)
+def AndClause_OR_OrClause(x, y):
+    exprs = [y.OR(sv) for sv in x.signed_vars]
+    return and_expression(exprs)
 
 
 @_OR(AndClause, SignedVar)

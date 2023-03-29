@@ -220,3 +220,4 @@ def simple_and_clauses():
 @run_test
 def tricky():
     check((x & y) & (~x | ~y), "F")
+    check((x & y) | (x | y), "x|y")
