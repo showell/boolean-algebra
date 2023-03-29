@@ -1,13 +1,50 @@
-from bool import TRUE, FALSE, SYMBOL
+import basic_bool
+import bool
 from lib.test_helpers import run_test, assert_str
+from truth_table import listify_truth_table, truth_table
 
-T = TRUE
-F = FALSE
 
-w = SYMBOL("w")
-x = SYMBOL("x")
-y = SYMBOL("y")
-z = SYMBOL("z")
+class BoolWrapper:
+    def __init__(self, basic_expr, expr):
+        self.basic_expr = basic_expr
+        self.expr = expr
+
+    def __str__(self):
+        return str(self.expr)
+
+    def __and__(self, other):
+        return BoolWrapper(
+            self.basic_expr & other.basic_expr,
+            self.expr & other.expr,
+        )
+
+    def __or__(self, other):
+        return BoolWrapper(
+            self.basic_expr | other.basic_expr,
+            self.expr | other.expr,
+        )
+
+    def __invert__(self):
+        return BoolWrapper(~self.basic_expr, ~self.expr)
+
+    def LOOSENS(self, other):
+        return self.expr.LOOSENS(other.expr)
+
+    def RESTRICTS(self, other):
+        return self.expr.RESTRICTS(other.expr)
+
+    @staticmethod
+    def SYMBOL(name):
+        return BoolWrapper(basic_bool.SYMBOL(name), bool.SYMBOL(name))
+
+
+T = BoolWrapper(basic_bool.TRUE, bool.TRUE)
+F = BoolWrapper(basic_bool.FALSE, bool.FALSE)
+
+w = BoolWrapper.SYMBOL("w")
+x = BoolWrapper.SYMBOL("x")
+y = BoolWrapper.SYMBOL("y")
+z = BoolWrapper.SYMBOL("z")
 
 
 @run_test
