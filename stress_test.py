@@ -15,22 +15,25 @@ def stress():
 
     seen_strs = {str(expr) for expr in exprs}
 
-    while len(exprs) < 100:
+    def handle(v):
+        v.check()
+        if str(v) not in seen_strs:
+            next_exprs.append(v)
+            seen_strs.add(str(v))
+
+    while len(exprs) < 500:
         next_exprs = []
 
         for expr in exprs:
             v = ~expr
-            next_exprs.append(v)
+            handle(v)
 
         for a in exprs:
             for b in exprs:
-                print(sorted(seen_strs))
+                print(len(seen_strs), sorted(seen_strs))
                 print(a, type(a.expr))
                 print(b, type(b.expr))
-                v = a & b
-                v.check()
-                if str(v) not in seen_strs:
-                    next_exprs.append(v)
-                    seen_strs.add(str(v))
+                handle(a & b)
+                handle(a | b)
 
         exprs.extend(next_exprs)
