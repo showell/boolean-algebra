@@ -17,14 +17,14 @@ class Expression:
         return self.NOT()
 
     def AND(self, other):
-        if self.RESTRICTS(other):
+        if other.LOOSENS(self):
             return self
         if other.RESTRICTS(self):
             return other
         return dispatch_and(self, other)
 
     def OR(self, other):
-        if self.LOOSENS(other):
+        if other.RESTRICTS(self):
             return self
         if other.LOOSENS(self):
             return other
