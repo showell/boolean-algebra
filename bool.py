@@ -238,6 +238,8 @@ class Conjunction(Junction):
         return Disjunction([clause.NOT() for clause in self.clauses])
 
     def RESTRICTS(self, other):
+        if type(other) == Conjunction:
+            return all(self.RESTRICTS(clause) for clause in other.clauses)
         return any(clause.RESTRICTS(other) for clause in self.clauses)
 
     def eval(self, tvars):

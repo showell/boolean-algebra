@@ -15,7 +15,7 @@ def check(expr, expected_str):
     if str(expr) != expected_str:
         raise AssertionError(f"got {expr} when expecting {expected_str}")
     expr.check()
-    # assert expr.RESTRICTS(expr)
+    assert expr.RESTRICTS(expr)
 
 
 @run_test
@@ -151,6 +151,9 @@ def restriction():
     assert ((x | y) & z).RESTRICTS(x | y)
     assert ((x | y) & (w | z)).RESTRICTS(x | y)
     assert (x & y).RESTRICTS((x & y) | (w & z))
+    assert x.RESTRICTS(x | (z & y))
+    assert (z & y).RESTRICTS(x | (z & y))
+    assert (x | (z & y)).RESTRICTS(x | (z & y))
 
     assert T.LOOSENS(F)
     assert T.LOOSENS(x)
